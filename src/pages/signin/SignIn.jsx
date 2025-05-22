@@ -14,7 +14,8 @@ const SignIn = () => {
     try {
       await signIn({ email, password });
     } catch (error) {
-      // Error is handled by AuthContext
+      console.error('Error signing in:', error);
+      
     }
   };
 
@@ -34,10 +35,10 @@ const SignIn = () => {
                 alt="Site Logo"
                 loading='lazy'
               />
-              <h2 className="mt-6 text-3xl font-bold text-gray-900 tracking-tight">
+              <h2 className="mt-6 text-3xl font-poppins font-semibold text-gray-900 tracking-tight">
                 Welcome Back
               </h2>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-2 text-sm text-gray-600 font-poppins font-light">
                 Sign in to access your dashboard
               </p>
             </div>
@@ -52,7 +53,7 @@ const SignIn = () => {
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-red-700">{error}</p>
+                      <p className="text-sm text-red-700 font-poppins font-light">{error}</p>
                     </div>
                   </div>
                 </div>
@@ -60,7 +61,7 @@ const SignIn = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="email-address" className="block text-sm text-gray-700 font-poppins">
                     Email address
                   </label>
                   <div className="mt-1">
@@ -70,7 +71,7 @@ const SignIn = () => {
                       type="email"
                       autoComplete="email"
                       required
-                      className="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
+                      className="appearance-none font-poppins block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
                       placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -79,7 +80,7 @@ const SignIn = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="block text-sm font-medium font-poppins text-gray-700">
                     Password
                   </label>
                   <div className="mt-1 relative">
@@ -89,7 +90,7 @@ const SignIn = () => {
                       type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       required
-                      className="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
+                      className="appearance-none block font-poppins w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
                       placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -114,13 +115,13 @@ const SignIn = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end">
-                <div className="text-sm">
+              <div className="flex items-center justify-start">
+                <div className="text-sm font-poppins">
                   <Link
                     to="/forgot-password"
-                    className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-150 ease-in-out"
+                    className="font-medium text-[#bd5b4c] hover:text-red-800 transition duration-150 ease-in-out"
                   >
-                    Forgot your password?
+                    Forgot your password ?
                   </Link>
                 </div>
               </div>
@@ -128,7 +129,7 @@ const SignIn = () => {
               <div>
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform hover:scale-[1.02] transition duration-150 ease-in-out"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform hover:scale-[1.02] transition duration-300 ease font-poppins uppercase"
                 >
                   Sign in
                 </button>

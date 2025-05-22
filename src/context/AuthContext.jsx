@@ -5,7 +5,7 @@ const AuthContext = createContext();
 
 // Test credentials
 const TEST_CREDENTIALS = {
-  email: 'admin@tilesimulator.com',
+  email: 'wajeeh.hassan@barontechs.com',
   password: 'admin123',
   name: 'Admin User'
 };
