@@ -12,9 +12,7 @@ const Navbar = () => {
       setUserImage(storedImage);
     }
   }, []);
-useEffect(() => {
-  console.log('User object:', user);
-}, [user]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -46,8 +44,12 @@ useEffect(() => {
             </div>
           </div>
 
-          <div className="flex items-center justify-end  space-x-4">
-            <span className="font-medium text-white font-poppins">{user?.userName}</span>
+          <div className="flex items-center justify-end space-x-4">
+            {user && (
+              <span className="font-medium text-white font-poppins">
+                {user.userName || 'Admin'}
+              </span>
+            )}
 
             <label className="relative w-9 h-9 border-2 border-[#bd5b4c] bg-white rounded-full overflow-hidden cursor-pointer flex items-center justify-center font-poppins">
               {userImage ? (

@@ -11,15 +11,20 @@ exports.signIn = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
 
-    const { _id, userName, role } = user;
+    // Send user data without sensitive information
+    const userData = {
+      id: user._id,
+      email: user.email,
+      userName: user.userName,
+      role: user.role || 'admin'
+    };
+
     res.status(200).json({
-      id: _id,
-      email,
-      userName,
-      role,
-      message: "Sign-in successful",
+      ...userData,
+      message: "Sign-in successful"
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Sign in error:', error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
