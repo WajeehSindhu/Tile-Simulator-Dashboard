@@ -38,6 +38,11 @@ const PrivateRoute = ({ children }) => {
 };
 
 const AppRoutes = () => {
+  const { isAuthChecked } = useAuth();
+
+   if (!isAuthChecked) {
+    return <Loader />;
+   }  
   return (
     <Routes>
       {/* Public Routes */}

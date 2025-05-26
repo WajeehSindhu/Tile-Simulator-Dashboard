@@ -1,17 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
 const AuthContext = createContext();
-
-// Test credentials
-const TEST_CREDENTIALS = {
-  email: 'wajeeh.hassan@barontechs.com',
-  password: 'admin123',
-  name: 'Admin User'
-};
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
@@ -24,38 +18,29 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(storedUser));
       setIsAuthenticated(true);
     }
+      setIsAuthChecked(true);
   }, []);
 
-  const signIn = async (credentials) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Check credentials
-      if (credentials.email === TEST_CREDENTIALS.email && 
-          credentials.password === TEST_CREDENTIALS.password) {
-        const userData = { 
-          email: credentials.email,
-          name: TEST_CREDENTIALS.name
-        };
-        setUser(userData);
-        setIsAuthenticated(true);
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(userData));
-        // Navigate to dashboard
-        navigate('/dashboard');
-      } else {
-        throw new Error('Invalid email or password');
-      }
-    } catch (error) {
-      setError(error.message);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const signIn = async (credentials) => {
+  setIsLoading(true);
+  setError(null);
+  try {
+    const response = await axios.post('http://localhost:5000/api/signin', {
+  email: credentials.email,
+  password: credentials.password
+});
+   const userData = response.data;
+    setUser(userData);
+    setIsAuthenticated(true);
+    localStorage.setItem('user', JSON.stringify(userData));
+    navigate('/dashboard');
+  } catch (error) {
+    setError(error.response?.data?.message || 'Sign in failed');
+    throw error;
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const signOut = () => {
     setUser(null);
@@ -70,6 +55,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       isAuthenticated,
+      isAuthChecked,
       isLoading,
       user,
       error,

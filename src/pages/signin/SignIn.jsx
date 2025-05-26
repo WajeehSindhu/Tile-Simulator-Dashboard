@@ -1,21 +1,23 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../../context/AuthContext';
 import Loader from '../../components/Loader';
+
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, isLoading, error } = useAuth();
+  const { signIn, isLoading, error  } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await signIn({ email, password });
-    } catch (error) {
-      console.error('Error signing in:', error);
-      
+      console.log("Successfully signed in");
+    } catch (err) {
+      console.error("Error Signing in", err);
     }
   };
 
@@ -24,6 +26,11 @@ const SignIn = () => {
   }
 
   return (
+   <>
+     <Helmet>
+        <title>Sign In - Lili Tile</title>
+        <meta name="description" content="Sign in to access the Admin Dashboard" />
+      </Helmet>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
       <div className="max-w-md w-full mx-4">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -36,7 +43,7 @@ const SignIn = () => {
                 loading='lazy'
               />
               <h2 className="mt-6 text-3xl font-poppins font-semibold text-gray-900 tracking-tight">
-                Welcome Back
+                Welcome Back 
               </h2>
               <p className="mt-2 text-sm text-gray-600 font-poppins font-light">
                 Sign in to access your dashboard
@@ -139,6 +146,7 @@ const SignIn = () => {
         </div>
       </div>
     </div>
+     </> 
   );
 };
 

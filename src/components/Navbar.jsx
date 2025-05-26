@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { UserIcon } from '@heroicons/react/24/solid'; // import user icon
+import { UserIcon } from '@heroicons/react/24/solid';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -12,7 +12,9 @@ const Navbar = () => {
       setUserImage(storedImage);
     }
   }, []);
-
+useEffect(() => {
+  console.log('User object:', user);
+}, [user]);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -45,7 +47,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center justify-end  space-x-4">
-            <span className="text-gray-700 font-medium text-white font-poppins">{user?.name}</span>
+            <span className="font-medium text-white font-poppins">{user?.userName}</span>
 
             <label className="relative w-9 h-9 border-2 border-[#bd5b4c] bg-white rounded-full overflow-hidden cursor-pointer flex items-center justify-center font-poppins">
               {userImage ? (
@@ -53,7 +55,7 @@ const Navbar = () => {
                   src={userImage}
                   alt="User"
                   loading="lazy"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full transition-transform hover:scale-105"
                 />
               ) : (
                 <UserIcon className="w-6 h-6 text-gray-400" />
