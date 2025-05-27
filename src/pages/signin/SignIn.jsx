@@ -28,7 +28,7 @@ const SignIn = () => {
   return (
    <>
      <Helmet>
-        <title>Sign In - Lili Tile</title>
+        <title>Sign In - Lili Tile Customizer</title>
         <meta name="description" content="Sign in to access the Admin Dashboard" />
       </Helmet>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">

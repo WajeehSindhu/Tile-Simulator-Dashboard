@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import {useAuth} from '../../context/AuthContext'
 
 const ForgetPassword = () => {
+  const { forgotPassword, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -12,13 +14,11 @@ const ForgetPassword = () => {
     setMessage('');
 
     try {
-      // Add your password reset logic here
-      // For now, we'll just simulate a successful request
-      console.log('Password reset requested for:', email);
-      setMessage('Password reset instructions have been sent to your email.');
+      const successMsg = await forgotPassword(email);
+      setMessage(successMsg);
       setEmail('');
     } catch (err) {
-      setError('Failed to send reset instructions. Please try again.');
+      setError(err.message);
     }
   };
 
@@ -66,9 +66,11 @@ const ForgetPassword = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#bd5b4c] hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#bd5b4c] font-poppins"
+              disabled={isLoading}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${isLoading ? 'bg-[#bd5b4c]/60 cursor-not-allowed' : 'bg-[#bd5b4c] hover:bg-red-700'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#bd5b4c] font-poppins`}
             >
-              Send reset instructions
+              {isLoading ? 'Sending...' : 'Send reset instructions'}
             </button>
           </div>
 

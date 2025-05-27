@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
   const navigate = useNavigate();
 
   // Check if user is already authenticated
@@ -29,6 +30,8 @@ const signIn = async (credentials) => {
   email: credentials.email,
   password: credentials.password
 });
+
+
    const userData = response.data;
     setUser(userData);
     setIsAuthenticated(true);
@@ -41,6 +44,40 @@ const signIn = async (credentials) => {
     setIsLoading(false);
   }
 };
+const forgotPassword = async (email) => {
+  setIsLoading(true);
+  setError(null);
+  try {
+    const response = await axios.post('http://localhost:5000/api/forgot-password', { email });
+    return response.data.message; // You can return this to show in your component
+  } catch (error) {
+    const errMsg = error.response?.data?.error || 'Failed to send reset instructions.';
+    setError(errMsg);
+    throw new Error(errMsg);
+  } finally {
+    setIsLoading(false);
+  }
+};
+  // ✅ NEW resetPassword method
+   const resetPassword = async (token, password, confirmPassword) => {
+    setIsLoading(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const response = await axios.post(`http://localhost:5000/api/reset-password/${token}`, {
+        password,
+        confirmPassword,
+      });
+      setMessage(response.data.message || 'Password reset successful!');
+      return response.data.message;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || 'Password reset failed.';
+      setError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const signOut = () => {
     setUser(null);
@@ -59,8 +96,11 @@ const signIn = async (credentials) => {
       isLoading,
       user,
       error,
+      message, 
       signIn,
-      signOut
+      signOut,
+     forgotPassword,
+      resetPassword
     }}>
       {children}
     </AuthContext.Provider>

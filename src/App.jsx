@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import SignIn from './pages/signin/SignIn';
 import ForgetPassword from './pages/forgetpassword/ForgetPassword';
+import ResetPassword from './pages/ResetPassword/ResetPassword';
 import Welcome from './pages/Dashboard/Welcome';
 import AllTiles from './pages/Tiles/AllTiles';
 import AddTiles from './pages/Tiles/AddTiles';
@@ -48,6 +49,7 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/signin" element={<SignIn />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
+     <Route path='reset-password/:token' element={<ResetPassword />} />
 
       {/* Protected Routes */}
       <Route
