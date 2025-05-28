@@ -49,7 +49,7 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/signin" element={<SignIn />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
-     <Route path='reset-password/:token' element={<ResetPassword />} />
+   <Route path='reset-password/:token' element={<ResetPassword />} />
 
       {/* Protected Routes */}
       <Route

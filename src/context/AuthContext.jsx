@@ -31,6 +31,8 @@ const signIn = async (credentials) => {
   password: credentials.password
 });
 
+    // Simulate delay (optional)
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
    const userData = response.data;
     setUser(userData);
@@ -49,7 +51,9 @@ const forgotPassword = async (email) => {
   setError(null);
   try {
     const response = await axios.post('http://localhost:5000/api/forgot-password', { email });
-    return response.data.message; // You can return this to show in your component
+      setMessage(response.data.message);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    return response.data.message; 
   } catch (error) {
     const errMsg = error.response?.data?.error || 'Failed to send reset instructions.';
     setError(errMsg);
@@ -68,6 +72,8 @@ const forgotPassword = async (email) => {
         password,
         confirmPassword,
       });
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
       setMessage(response.data.message || 'Password reset successful!');
       return response.data.message;
     } catch (error) {

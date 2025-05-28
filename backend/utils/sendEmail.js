@@ -4,13 +4,13 @@ const sendEmail = async (to, subject, html) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,       // Your Gmail
-      pass: process.env.EMAIL_PASS        // App password
+      user: process.env.EMAIL_USER,      
+      pass: process.env.EMAIL_PASS        
     }
   });
 
   await transporter.sendMail({
-    from: `"Wajeeh Auth" <${process.env.EMAIL_USER}>`,
+    from: `<${process.env.EMAIL_USER}>`,
     to,
     subject,
     html,

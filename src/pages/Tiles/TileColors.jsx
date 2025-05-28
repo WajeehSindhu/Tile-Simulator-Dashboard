@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 const TileColors = () => {
   const [colors, setColors] = useState([]);
@@ -20,6 +21,11 @@ const TileColors = () => {
   };
 
   return (
+    <>
+     <Helmet>
+        <title>Tile Colors - Lili Tile Customizer</title>
+        <meta name="description" content="Choose and submit tile colors for your tile customization." />
+      </Helmet>
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-6">Tile Colors</h1>
 
@@ -80,6 +86,7 @@ const TileColors = () => {
         )}
       </div>
     </div>
+     </>
   );
 };
 

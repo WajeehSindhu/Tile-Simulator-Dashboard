@@ -1,9 +1,19 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
 const Submissions = () => {
   const submissions = []; // This will be populated from your data source
 
   return (
+    <>
+       <Helmet>
+        <title>Submission - Lili Tile Customizer</title>
+        <meta
+          name="description"
+          content="Submit a new tile or update existing tiles in the Lili Tile Customizer."
+        />
+      </Helmet>
+  
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-6">Tile Submissions</h1>
 
@@ -82,6 +92,7 @@ const Submissions = () => {
         )}
       </div>
     </div>
+     </>
   );
 };
 

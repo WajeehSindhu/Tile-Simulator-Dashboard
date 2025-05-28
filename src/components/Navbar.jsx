@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { UserIcon } from '@heroicons/react/24/solid';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -30,7 +31,7 @@ const Navbar = () => {
     <nav className="bg-black px-5 py-2">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between">
-          <div className="flex items-center gap-2">
+          <Link to="/dashboard" className="flex items-center gap-2">
             <div className='h-8 w-auto'>
               <img
                 className="w-full h-full object-cover"
@@ -42,8 +43,7 @@ const Navbar = () => {
             <div className='font-poppins text-xl text-white'>
               <span>Lili Tile</span>
             </div>
-          </div>
-
+          </Link>
           <div className="flex items-center justify-end space-x-4">
             {user && (
               <span className="font-medium text-white font-poppins">
@@ -51,7 +51,9 @@ const Navbar = () => {
               </span>
             )}
 
-            <label className="relative w-9 h-9 border-2 border-[#bd5b4c] bg-white rounded-full overflow-hidden cursor-pointer flex items-center justify-center font-poppins">
+            <label
+              style={{ cursor: 'pointer' }}
+            className="relative w-9 h-9 border-2 border-[#bd5b4c] bg-white rounded-full overflow-hidden  flex items-center justify-center font-poppins">
               {userImage ? (
                 <img
                   src={userImage}
@@ -60,15 +62,16 @@ const Navbar = () => {
                   className="w-full h-full object-cover rounded-full transition-transform hover:scale-105"
                 />
               ) : (
-                <UserIcon className="w-6 h-6 text-gray-400" />
+                <UserIcon className="w-6 h-6 text-gray-400 " />
               )}
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                className="absolute top-0 left-0 w-full h-full opacity-0 "
               />
             </label>
+
 
             <button
               onClick={signOut}
