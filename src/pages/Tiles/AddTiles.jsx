@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useAuth } from '../../context/AuthContext';
 
 const AddTiles = () => {
   const navigate = useNavigate();
+  const { addTile, tileLoading, tileError } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -31,23 +34,47 @@ const AddTiles = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your form submission logic here
-    console.log('Form submitted:', formData);
-    navigate('/dashboard/tiles');
+    try {
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('category', formData.category);
+      data.append('color', formData.color);
+      data.append('price', formData.price);
+      data.append('description', formData.description);
+      if (formData.image) data.append('images', formData.image); // must match multer field name on backend
+
+      await addTile(data);
+
+      // On success, navigate to tiles list
+      navigate('/dashboard/tiles');
+    } catch (err) {
+      // Error is handled in context (tileError)
+      console.error(err);
+    }
   };
 
   return (
     <>
       <Helmet>
         <title>Add Tiles - Lili Tile Customizer</title>
-        <meta name="description" content="Add new tiles to customize your design in Lili Tile Customizer." />
+        <meta
+          name="description"
+          content="Add new tiles to customize your design in Lili Tile Customizer."
+        />
       </Helmet>
+
       <div className="p-6">
         <h1 className="text-2xl font-semibold mb-6">Add New Tile</h1>
-        <form onSubmit={handleSubmit} className="max-w-2xl bg-white rounded-lg shadow p-6">
+
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-2xl bg-white rounded-lg shadow p-6"
+          encType="multipart/form-data"
+        >
           <div className="space-y-4">
+            {/* Tile Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tile Name
@@ -62,6 +89,7 @@ const AddTiles = () => {
               />
             </div>
 
+            {/* Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Category
@@ -74,10 +102,11 @@ const AddTiles = () => {
                 required
               >
                 <option value="">Select a category</option>
-                {/* Add your categories here */}
+                {/* TODO: Populate categories dynamically or hardcode here */}
               </select>
             </div>
 
+            {/* Color */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Color
@@ -90,10 +119,11 @@ const AddTiles = () => {
                 required
               >
                 <option value="">Select a color</option>
-                {/* Add your colors here */}
+                {/* TODO: Populate colors dynamically or hardcode here */}
               </select>
             </div>
 
+            {/* Price */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Price
@@ -105,9 +135,12 @@ const AddTiles = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                 required
+                min="0"
+                step="0.01"
               />
             </div>
 
+            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
@@ -121,6 +154,7 @@ const AddTiles = () => {
               />
             </div>
 
+            {/* Tile Image */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tile Image
@@ -135,12 +169,16 @@ const AddTiles = () => {
             </div>
           </div>
 
+          {/* Submit and Cancel Buttons */}
           <div className="mt-6 flex gap-4">
             <button
               type="submit"
-              className="bg-[#bd5b4c] text-white px-6 py-2 rounded hover:bg-red-700 transition-colors"
+              disabled={tileLoading}
+              className={`${
+                tileLoading ? 'opacity-50 cursor-not-allowed' : ''
+              } bg-[#bd5b4c] text-white px-6 py-2 rounded hover:bg-red-700 transition-colors`}
             >
-              Add Tile
+              {tileLoading ? 'Adding...' : 'Add Tile'}
             </button>
             <button
               type="button"
@@ -150,9 +188,13 @@ const AddTiles = () => {
               Cancel
             </button>
           </div>
+
+          {/* Show error from context */}
+          {tileError && (
+            <p className="mt-4 text-red-600 font-medium text-center">{tileError}</p>
+          )}
         </form>
       </div>
-
     </>
   );
 };
