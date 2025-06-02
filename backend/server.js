@@ -4,7 +4,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const tileRoutes = require('./routes/tileRoute');
-
+const tileCategoryRoutes = require("./routes/tileCategoryRoutes");
+const tileColorRoutes = require("./routes/tileColorRoutes")
 dotenv.config();
 
 const app = express();
@@ -25,6 +26,7 @@ mongoose.connect(process.env.MONGO_URL)
 
 app.use('/api', authRoutes);
 app.use('/api', tileRoutes);
-
+app.use("/api", tileCategoryRoutes);
+app.use("/api/colors", tileColorRoutes)
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on http://127.0.0.1:${PORT}`));

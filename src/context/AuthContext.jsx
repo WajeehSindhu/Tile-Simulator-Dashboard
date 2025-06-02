@@ -126,7 +126,6 @@ export const AuthProvider = ({ children }) => {
       setTileLoading(false);
     }
   };
-
   return (
     <AuthContext.Provider
       value={{
