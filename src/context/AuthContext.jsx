@@ -12,6 +12,13 @@ export const AuthProvider = ({ children }) => {
   const [message, setMessage] = useState(null);
   const [tileLoading, setTileLoading] = useState(false);
   const [tileError, setTileError] = useState(null);
+  const [tileColors, setTileColors] = useState([]);
+  const [colorLoading, setColorLoading] = useState(false);
+  const [colorError, setColorError] = useState(null);
+  const [tileCategories, setTileCategories] = useState([]);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+  const [categoryError, setCategoryError] = useState(null);
+
   const navigate = useNavigate();
 
   // Check if user is already authenticated
@@ -126,6 +133,152 @@ export const AuthProvider = ({ children }) => {
       setTileLoading(false);
     }
   };
+  // ✅ Fetch Colors
+  const fetchTileColors = async () => {
+    setColorLoading(true);
+    setColorError(null);
+    try {
+      const response = await axios.get("http://localhost:5000/api/colors");
+      setTileColors(response.data);
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to fetch colors";
+      setColorError(errMsg);
+    } finally {
+      setColorLoading(false);
+    }
+  };
+
+  // ✅ Add New Color
+  const addTileColor = async (hexCode) => {
+    setColorLoading(true);
+    setColorError(null);
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/colors/add",
+        { hexCode }
+      );
+      setTileColors((prev) => [...prev, response.data]);
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to add color";
+      setColorError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setColorLoading(false);
+    }
+  };
+
+  // Delete Color
+  const deleteTileColor = async (id) => {
+    setColorLoading(true);
+    setColorError(null);
+    try {
+      await axios.delete(`http://localhost:5000/api/colors/${id}`);
+      setTileColors((prev) => prev.filter((color) => color._id !== id));
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to delete color";
+      setColorError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setColorLoading(false);
+    }
+  };
+  // Fetch Categories
+  const fetchTileCategories = async () => {
+    setCategoryLoading(true);
+    setCategoryError(null);
+    try {
+      const response = await axios.get("http://localhost:5000/api/categories");
+      setTileCategories(response.data);
+    } catch (error) {
+      const errMsg =
+        error.response?.data?.error || "Failed to fetch categories";
+      setCategoryError(errMsg);
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  // Add Category
+  const addTileCategory = async (formData) => {
+    setCategoryLoading(true);
+    setCategoryError(null);
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/categories",
+        formData
+      );
+      setTileCategories((prev) => [...prev, response.data]);
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to add category";
+      setCategoryError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  // Update Category
+  const updateTileCategory = async (id, formData) => {
+    setCategoryLoading(true);
+    setCategoryError(null);
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/categories/${id}`,
+        formData
+      );
+      setTileCategories((prev) =>
+        prev.map((cat) => (cat._id === id ? response.data : cat))
+      );
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to update category";
+      setCategoryError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  // Delete Category
+  const deleteTileCategory = async (id) => {
+    setCategoryLoading(true);
+    setCategoryError(null);
+    try {
+      await axios.delete(`http://localhost:5000/api/categories/${id}`);
+      setTileCategories((prev) => prev.filter((cat) => cat._id !== id));
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to delete category";
+      setCategoryError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  // Update Color
+  const updateTileColor = async (id, hexCode) => {
+    setColorLoading(true);
+    setColorError(null);
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/colors/${id}`,
+        { hexCode }
+      );
+      setTileColors((prev) =>
+        prev.map((color) => (color._id === id ? response.data : color))
+      );
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to update color";
+      setColorError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setColorLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -142,6 +295,20 @@ export const AuthProvider = ({ children }) => {
         addTile,
         tileLoading,
         tileError,
+        tileColors,
+        fetchTileColors,
+        addTileColor,
+        deleteTileColor,
+        updateTileColor,
+        colorLoading,
+        colorError,
+        tileCategories,
+        categoryLoading,
+        categoryError,
+        fetchTileCategories,
+        addTileCategory,
+        updateTileCategory,
+        deleteTileCategory,
       }}
     >
       {children}

@@ -29,7 +29,7 @@ const Sidebar = () => {
     <div
       className={`${
         isSidebarOpen ? 'w-64 p-4' : 'w-auto py-5'
-      } h-screen bg-[#212529] text-white  space-y-2 transition-all duration-300 relative`}
+      } min-h-screen bg-[#212529] text-white  space-y-2 transition-all duration-300 relative`}
     >
       <NavLink to="/dashboard" className={linkClass}>
         <div
