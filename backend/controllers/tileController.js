@@ -2,6 +2,12 @@ const Tile = require('../models/tile');
 const Color = require('../models/tileColor');
 const TileCategory = require('../models/tileCategory');
 const { deleteFile } = require('../utils/fileHelper');
+const path = require('path');
+
+// Helper function to convert absolute path to relative path
+const getRelativePath = (absolutePath) => {
+  return absolutePath.split('uploads/')[1];
+};
 
 exports.createTile = async (req, res) => {
   try {
@@ -31,7 +37,7 @@ exports.createTile = async (req, res) => {
       return res.status(400).json({ error: 'Main mask image is required' });
     }
 
-    const mainMaskPath = req.files.mainMask[0].path;
+    const mainMaskPath = getRelativePath(req.files.mainMask[0].path.replace(/\\/g, '/')); // Convert Windows paths and make relative
     const tileMasks = req.files.tileMasks || [];
     const tileMaskColors = req.body.tileMaskColors ? 
       Array.isArray(req.body.tileMaskColors) ? 
@@ -44,7 +50,7 @@ exports.createTile = async (req, res) => {
       const exists = await Color.findById(colorId);
       if (!exists) {
         // Clean up uploaded files
-        await deleteFile(mainMaskPath);
+        await deleteFile(path.join(__dirname, '..', 'uploads', mainMaskPath));
         for (const mask of tileMasks) {
           await deleteFile(mask.path);
         }
@@ -52,9 +58,9 @@ exports.createTile = async (req, res) => {
       }
     }
 
-    // Create sub masks array
+    // Create sub masks array with normalized paths
     const subMasks = tileMasks.map((mask, index) => ({
-      image: mask.path,
+      image: getRelativePath(mask.path.replace(/\\/g, '/')),
       backgroundColor: tileMaskColors[index]
     }));
 
@@ -71,15 +77,13 @@ exports.createTile = async (req, res) => {
 
     await tile.save();
 
-    // Return tile data without file paths
-    const tileData = tile.toObject();
-    delete tileData.mainMask;
-    tileData.subMasks = tileData.subMasks.map(mask => ({
-      ...mask,
-      image: undefined
-    }));
+    // Return complete tile data including file paths
+    const savedTile = await Tile.findById(tile._id)
+      .populate('backgroundColor', 'hexCode')
+      .populate('category', 'name')
+      .populate('subMasks.backgroundColor', 'hexCode');
 
-    res.status(201).json(tileData);
+    res.status(201).json(savedTile);
   } catch (error) {
     // Clean up any uploaded files if there's an error
     if (req.files?.mainMask?.[0]) {
@@ -100,8 +104,8 @@ exports.getTiles = async (req, res) => {
   try {
     const tiles = await Tile.find()
       .populate('backgroundColor', 'hexCode')
+      .populate('category', 'name')
       .populate('subMasks.backgroundColor', 'hexCode')
-      .select('-mainMask -subMasks.image')
       .sort('-createdAt');
     
     res.json(tiles);
@@ -155,8 +159,8 @@ exports.updateTile = async (req, res) => {
     // Handle main mask update
     let mainMaskPath = tile.mainMask;
     if (req.files?.mainMask?.[0]) {
-      await deleteFile(tile.mainMask);
-      mainMaskPath = req.files.mainMask[0].path;
+      await deleteFile(path.join(__dirname, '..', 'uploads', mainMaskPath));
+      mainMaskPath = getRelativePath(req.files.mainMask[0].path.replace(/\\/g, '/'));
     }
 
     // Handle sub masks update
@@ -179,12 +183,12 @@ exports.updateTile = async (req, res) => {
 
       // Delete old sub mask images
       for (const mask of tile.subMasks) {
-        await deleteFile(mask.image);
+        await deleteFile(path.join(__dirname, '..', 'uploads', mask.image));
       }
 
       // Create new sub masks array
       subMasks = tileMasks.map((mask, index) => ({
-        image: mask.path,
+        image: getRelativePath(mask.path.replace(/\\/g, '/')),
         backgroundColor: tileMaskColors[index]
       }));
     }
@@ -222,9 +226,9 @@ exports.deleteTile = async (req, res) => {
     }
 
     // Delete all associated images
-    await deleteFile(tile.mainMask);
+    await deleteFile(path.join(__dirname, '..', 'uploads', tile.mainMask));
     for (const mask of tile.subMasks) {
-      await deleteFile(mask.image);
+      await deleteFile(path.join(__dirname, '..', 'uploads', mask.image));
     }
 
     await tile.deleteOne();

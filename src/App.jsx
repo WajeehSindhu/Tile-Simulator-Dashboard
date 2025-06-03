@@ -86,6 +86,16 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/dashboard/tiles/edit/:id"
+        element={
+          <PrivateRoute>
+            <DashboardLayout>
+              <AddTiles />
+            </DashboardLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/dashboard/categories"
         element={
           <PrivateRoute>

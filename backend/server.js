@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const tileRoutes = require('./routes/tileRoute');
 const tileCategoryRoutes = require("./routes/tileCategoryRoutes");
@@ -17,17 +18,18 @@ app.use(cors({
 
 app.use(express.json());
 
-// Serve uploads folder statically so uploaded images are accessible
-app.use("/uploads", express.static("uploads")); // serve uploaded files
-app.use("/api/tiles", tileRoutes);
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Routes
+app.use('/api/tiles', tileRoutes);
+app.use('/api', authRoutes);
+app.use("/api", tileCategoryRoutes);
+app.use("/api/colors", tileColorRoutes);
 
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log(err));
 
-app.use('/api', authRoutes);
-app.use('/api', tileRoutes);
-app.use("/api", tileCategoryRoutes);
-app.use("/api/colors", tileColorRoutes)
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on http://127.0.0.1:${PORT}`));

@@ -11,7 +11,7 @@ const {
 
 // Create a new tile
 router.post(
-  "/tiles",
+  "/",
   upload.fields([
     { name: "mainMask", maxCount: 1 },
     { name: "tileMasks", maxCount: 10 }
@@ -20,14 +20,14 @@ router.post(
 );
 
 // Get all tiles
-router.get("/tiles", getTiles);
+router.get("/", getTiles);
 
 // Get a specific tile
-router.get("/tiles/:id", getTileById);
+router.get("/:id", getTileById);
 
 // Update a tile
 router.put(
-  "/tiles/:id",
+  "/:id",
   upload.fields([
     { name: "mainMask", maxCount: 1 },
     { name: "tileMasks", maxCount: 10 }
@@ -36,6 +36,6 @@ router.put(
 );
 
 // Delete a tile
-router.delete("/tiles/:id", deleteTile);
+router.delete("/:id", deleteTile);
 
 module.exports = router;
