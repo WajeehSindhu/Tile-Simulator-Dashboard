@@ -36,10 +36,10 @@ const TileCategories = () => {
     try {
       if (editingId) {
         await updateTileCategory(editingId, formData);
-        setSuccessMessage("Category updated successfully!");
+        // setSuccessMessage("Category updated successfully!");
       } else {
         await addTileCategory(formData);
-        setSuccessMessage("Category added successfully!");
+        // setSuccessMessage("Category added successfully!");
       }
       setFormData({ name: "", description: "" });
       setEditingId(null);
@@ -132,7 +132,7 @@ const TileCategories = () => {
               <div className="flex space-x-2">
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded text-sm"
+                  className="bg-[#BD5B4C] text-white px-4 py-2 rounded text-sm"
                 >
                   {editingId ? "Update Category" : "Add New Category"}
                 </button>
@@ -213,7 +213,7 @@ const TileCategories = () => {
                       key={page}
                       onClick={() => goToPage(page)}
                       className={`px-3 py-1 border rounded ${
-                        page === currentPage ? "bg-blue-500 text-white" : ""
+                        page === currentPage ? "bg-[#BD5B4C] text-white" : ""
                       }`}
                     >
                       {page}
