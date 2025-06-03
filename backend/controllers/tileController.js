@@ -1,39 +1,237 @@
-const Tile = require("../addTiles/tile");
+const Tile = require('../models/tile');
+const Color = require('../models/tileColor');
+const fs = require('fs').promises;
+const path = require('path');
 
-const createTile = async (req, res) => {
+// Helper function to handle file deletion
+const deleteFile = async (filePath) => {
   try {
-    const mask = req.body.mask ? JSON.parse(req.body.mask) : {};
+    await fs.unlink(filePath);
+  } catch (error) {
+    console.error(`Error deleting file ${filePath}:`, error);
+  }
+};
 
-    // Extract uploaded image paths
-    const images = req.files ? req.files.map(file => file.path) : [];
+exports.createTile = async (req, res) => {
+  try {
+    const {
+      tileName,
+      backgroundColor,
+      groutShape,
+      shapeStyle,
+      scale
+    } = req.body;
 
-    const newTile = new Tile({
-      name: req.body.name,
-      description: req.body.description,
-      mask: {
-        backgroundColor: mask.backgroundColor,
-        groutShape: mask.groutShape,
-        shapeStyle: mask.shapeStyle,
-        scale: mask.scale,
-        images,
-      },
+    // Validate color exists
+    const color = await Color.findById(backgroundColor);
+    if (!color) {
+      return res.status(400).json({ error: 'Invalid background color selected' });
+    }
+
+    // Validate files
+    if (!req.files?.mainMask?.[0]) {
+      return res.status(400).json({ error: 'Main mask image is required' });
+    }
+
+    const mainMaskPath = req.files.mainMask[0].path;
+    const tileMasks = req.files.tileMasks || [];
+    const tileMaskColors = req.body.tileMaskColors ? 
+      Array.isArray(req.body.tileMaskColors) ? 
+        req.body.tileMaskColors : 
+        [req.body.tileMaskColors] : 
+      [];
+
+    // Validate sub mask colors exist
+    for (const colorId of tileMaskColors) {
+      const exists = await Color.findById(colorId);
+      if (!exists) {
+        // Clean up uploaded files
+        await deleteFile(mainMaskPath);
+        for (const mask of tileMasks) {
+          await deleteFile(mask.path);
+        }
+        return res.status(400).json({ error: `Invalid sub mask color selected: ${colorId}` });
+      }
+    }
+
+    // Create sub masks array
+    const subMasks = tileMasks.map((mask, index) => ({
+      image: mask.path,
+      backgroundColor: tileMaskColors[index]
+    }));
+
+    const tile = new Tile({
+      tileName,
+      mainMask: mainMaskPath,
+      backgroundColor,
+      groutShape,
+      shapeStyle,
+      scale: parseFloat(scale),
+      subMasks
     });
 
-    await newTile.save();
-    res.status(201).json(newTile);
+    await tile.save();
+
+    // Return tile data without file paths
+    const tileData = tile.toObject();
+    delete tileData.mainMask;
+    tileData.subMasks = tileData.subMasks.map(mask => ({
+      ...mask,
+      image: undefined
+    }));
+
+    res.status(201).json(tileData);
   } catch (error) {
-    console.error("Create tile error:", error);
-    res.status(500).json({ error: "Failed to create tile" });
+    // Clean up any uploaded files if there's an error
+    if (req.files?.mainMask?.[0]) {
+      await deleteFile(req.files.mainMask[0].path);
+    }
+    if (req.files?.tileMasks) {
+      for (const mask of req.files.tileMasks) {
+        await deleteFile(mask.path);
+      }
+    }
+    
+    console.error('Create tile error:', error);
+    res.status(500).json({ error: 'Failed to create tile' });
   }
 };
 
-const getTiles = async (req, res) => {
+exports.getTiles = async (req, res) => {
   try {
-    const tiles = await Tile.find();
+    const tiles = await Tile.find()
+      .populate('backgroundColor', 'hexCode')
+      .populate('subMasks.backgroundColor', 'hexCode')
+      .select('-mainMask -subMasks.image')
+      .sort('-createdAt');
+    
     res.json(tiles);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    console.error('Get tiles error:', error);
+    res.status(500).json({ error: 'Failed to fetch tiles' });
   }
 };
 
-module.exports = { createTile, getTiles };
+exports.getTileById = async (req, res) => {
+  try {
+    const tile = await Tile.findById(req.params.id)
+      .populate('backgroundColor', 'hexCode')
+      .populate('subMasks.backgroundColor', 'hexCode')
+      .select('-mainMask -subMasks.image');
+    
+    if (!tile) {
+      return res.status(404).json({ error: 'Tile not found' });
+    }
+    
+    res.json(tile);
+  } catch (error) {
+    console.error('Get tile error:', error);
+    res.status(500).json({ error: 'Failed to fetch tile' });
+  }
+};
+
+exports.updateTile = async (req, res) => {
+  try {
+    const {
+      tileName,
+      backgroundColor,
+      groutShape,
+      shapeStyle,
+      scale
+    } = req.body;
+
+    const tile = await Tile.findById(req.params.id);
+    if (!tile) {
+      return res.status(404).json({ error: 'Tile not found' });
+    }
+
+    // Validate color if being updated
+    if (backgroundColor) {
+      const color = await Color.findById(backgroundColor);
+      if (!color) {
+        return res.status(400).json({ error: 'Invalid background color selected' });
+      }
+    }
+
+    // Handle main mask update
+    let mainMaskPath = tile.mainMask;
+    if (req.files?.mainMask?.[0]) {
+      await deleteFile(tile.mainMask);
+      mainMaskPath = req.files.mainMask[0].path;
+    }
+
+    // Handle sub masks update
+    let subMasks = tile.subMasks;
+    if (req.files?.tileMasks || req.body.tileMaskColors) {
+      const tileMasks = req.files.tileMasks || [];
+      const tileMaskColors = req.body.tileMaskColors ? 
+        Array.isArray(req.body.tileMaskColors) ? 
+          req.body.tileMaskColors : 
+          [req.body.tileMaskColors] : 
+        [];
+
+      // Validate new sub mask colors
+      for (const colorId of tileMaskColors) {
+        const exists = await Color.findById(colorId);
+        if (!exists) {
+          return res.status(400).json({ error: `Invalid sub mask color selected: ${colorId}` });
+        }
+      }
+
+      // Delete old sub mask images
+      for (const mask of tile.subMasks) {
+        await deleteFile(mask.image);
+      }
+
+      // Create new sub masks array
+      subMasks = tileMasks.map((mask, index) => ({
+        image: mask.path,
+        backgroundColor: tileMaskColors[index]
+      }));
+    }
+
+    tile.tileName = tileName || tile.tileName;
+    tile.backgroundColor = backgroundColor || tile.backgroundColor;
+    tile.groutShape = groutShape || tile.groutShape;
+    tile.shapeStyle = shapeStyle || tile.shapeStyle;
+    tile.scale = scale ? parseFloat(scale) : tile.scale;
+    tile.mainMask = mainMaskPath;
+    tile.subMasks = subMasks;
+
+    await tile.save();
+
+    // Return tile data without file paths
+    const tileData = tile.toObject();
+    delete tileData.mainMask;
+    tileData.subMasks = tileData.subMasks.map(mask => ({
+      ...mask,
+      image: undefined
+    }));
+
+    res.json(tileData);
+  } catch (error) {
+    console.error('Update tile error:', error);
+    res.status(500).json({ error: 'Failed to update tile' });
+  }
+};
+
+exports.deleteTile = async (req, res) => {
+  try {
+    const tile = await Tile.findById(req.params.id);
+    if (!tile) {
+      return res.status(404).json({ error: 'Tile not found' });
+    }
+
+    // Delete all associated images
+    await deleteFile(tile.mainMask);
+    for (const mask of tile.subMasks) {
+      await deleteFile(mask.image);
+    }
+
+    await tile.deleteOne();
+    res.json({ message: 'Tile deleted successfully' });
+  } catch (error) {
+    console.error('Delete tile error:', error);
+    res.status(500).json({ error: 'Failed to delete tile' });
+  }
+};

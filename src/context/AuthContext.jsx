@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [message, setMessage] = useState(null);
   const [tileLoading, setTileLoading] = useState(false);
   const [tileError, setTileError] = useState(null);
+  const [tiles, setTiles] = useState([]);
   const [tileColors, setTileColors] = useState([]);
   const [colorLoading, setColorLoading] = useState(false);
   const [colorError, setColorError] = useState(null);
@@ -111,6 +112,20 @@ export const AuthProvider = ({ children }) => {
     navigate("/signin");
   };
 
+  const fetchTiles = async () => {
+    setTileLoading(true);
+    setTileError(null);
+    try {
+      const response = await axios.get("http://localhost:5000/api/tiles");
+      setTiles(response.data);
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to fetch tiles";
+      setTileError(errMsg);
+    } finally {
+      setTileLoading(false);
+    }
+  };
+
   const addTile = async (formData) => {
     setTileLoading(true);
     setTileError(null);
@@ -124,6 +139,7 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
+      setTiles(prev => [...prev, response.data]);
       return response.data;
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to add tile";
@@ -133,6 +149,46 @@ export const AuthProvider = ({ children }) => {
       setTileLoading(false);
     }
   };
+
+  const updateTile = async (id, formData) => {
+    setTileLoading(true);
+    setTileError(null);
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/tiles/${id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setTiles(prev => prev.map(tile => tile._id === id ? response.data : tile));
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to update tile";
+      setTileError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setTileLoading(false);
+    }
+  };
+
+  const deleteTile = async (id) => {
+    setTileLoading(true);
+    setTileError(null);
+    try {
+      await axios.delete(`http://localhost:5000/api/tiles/${id}`);
+      setTiles(prev => prev.filter(tile => tile._id !== id));
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to delete tile";
+      setTileError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setTileLoading(false);
+    }
+  };
+
   // ✅ Fetch Colors
   const fetchTileColors = async () => {
     setColorLoading(true);
@@ -292,7 +348,11 @@ export const AuthProvider = ({ children }) => {
         signOut,
         forgotPassword,
         resetPassword,
+        tiles,
+        fetchTiles,
         addTile,
+        updateTile,
+        deleteTile,
         tileLoading,
         tileError,
         tileColors,

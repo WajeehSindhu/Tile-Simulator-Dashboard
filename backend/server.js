@@ -18,7 +18,8 @@ app.use(cors({
 app.use(express.json());
 
 // Serve uploads folder statically so uploaded images are accessible
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static("uploads")); // serve uploaded files
+app.use("/api/tiles", tileRoutes);
 
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log('MongoDB connected'))

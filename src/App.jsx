@@ -18,12 +18,12 @@ const DashboardLayout = ({ children }) => {
   return (
     <section className='w-full min-h-screen overflow-hidden'>
       <Navbar />
-    <div className="flex">
-      <Sidebar />
-        <main className="w-full   bg-gray-100">
+      <div className="flex">
+        <Sidebar />
+        <main className="w-full bg-gray-100">
           {children}
         </main>
-    </div>
+      </div>
     </section>
   );
 };
@@ -41,15 +41,16 @@ const PrivateRoute = ({ children }) => {
 const AppRoutes = () => {
   const { isAuthChecked } = useAuth();
 
-   if (!isAuthChecked) {
+  if (!isAuthChecked) {
     return <Loader />;
-   }  
+  }
+
   return (
     <Routes>
       {/* Public Routes */}
       <Route path="/signin" element={<SignIn />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
-   <Route path='reset-password/:token' element={<ResetPassword />} />
+      <Route path='reset-password/:token' element={<ResetPassword />} />
 
       {/* Protected Routes */}
       <Route
@@ -62,8 +63,10 @@ const AppRoutes = () => {
           </PrivateRoute>
         }
       />
+
+      {/* Tile Routes */}
       <Route
-        path="/dashboard/tiles"
+        path="/dashboard/all-tiles"
         element={
           <PrivateRoute>
             <DashboardLayout>
@@ -73,7 +76,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/dashboard/add-tile"
+        path="/dashboard/tiles/add"
         element={
           <PrivateRoute>
             <DashboardLayout>
@@ -115,6 +118,9 @@ const AppRoutes = () => {
 
       {/* Redirect root to dashboard */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Handle old route */}
+      <Route path="/dashboard/add-tile" element={<Navigate to="/dashboard/tiles/add" replace />} />
     </Routes>
   );
 };
