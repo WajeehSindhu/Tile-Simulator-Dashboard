@@ -18,6 +18,11 @@ const tileSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'TileCategory',
+    required: true
+  },
   mainMask: {
     type: String,  // Path to stored image file
     required: true

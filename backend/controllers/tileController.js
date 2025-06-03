@@ -1,26 +1,24 @@
 const Tile = require('../models/tile');
 const Color = require('../models/tileColor');
-const fs = require('fs').promises;
-const path = require('path');
-
-// Helper function to handle file deletion
-const deleteFile = async (filePath) => {
-  try {
-    await fs.unlink(filePath);
-  } catch (error) {
-    console.error(`Error deleting file ${filePath}:`, error);
-  }
-};
+const TileCategory = require('../models/tileCategory');
+const { deleteFile } = require('../utils/fileHelper');
 
 exports.createTile = async (req, res) => {
   try {
     const {
       tileName,
+      category,
       backgroundColor,
       groutShape,
       shapeStyle,
       scale
     } = req.body;
+
+    // Validate category exists
+    const tileCategory = await TileCategory.findById(category);
+    if (!tileCategory) {
+      return res.status(400).json({ error: 'Invalid category selected' });
+    }
 
     // Validate color exists
     const color = await Color.findById(backgroundColor);
@@ -62,6 +60,7 @@ exports.createTile = async (req, res) => {
 
     const tile = new Tile({
       tileName,
+      category,
       mainMask: mainMaskPath,
       backgroundColor,
       groutShape,
