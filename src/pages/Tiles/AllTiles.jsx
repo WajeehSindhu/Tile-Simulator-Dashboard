@@ -122,13 +122,14 @@ const AllTiles = () => {
               ) : (
                 currentTiles.map((tile) => (
                   <tr key={tile._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-16 w-16 flex-shrink-0 mr-4">
                           <div className="h-full w-full rounded-lg overflow-hidden">
                             {tile.mainMask ? (
                               <img
-                                 src={`http://localhost:5000/uploads/${tile.mainMask}`} alt={tile.tileName}
+                                src={tile.mainMask}
+                                alt={tile.tileName}
                                 className="h-full w-full object-cover"
                                 onError={(e) => {
                                   e.target.onerror = null;

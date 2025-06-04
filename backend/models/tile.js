@@ -5,6 +5,10 @@ const subMaskSchema = new mongoose.Schema({
     type: String,  // Path to stored image file
     required: true
   },
+  publicId: {
+    type: String,  // Cloudinary public ID
+    required: true
+  },
   backgroundColor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Color',
@@ -25,6 +29,10 @@ const tileSchema = new mongoose.Schema({
   },
   mainMask: {
     type: String,  // Path to stored image file
+    required: true
+  },
+  mainMaskPublicId: {
+    type: String,  // Cloudinary public ID
     required: true
   },
   backgroundColor: {
@@ -60,6 +68,29 @@ const tileSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  }
+});
+
+// Add middleware to clean up Cloudinary images before deletion
+tileSchema.pre('deleteOne', { document: true }, async function(next) {
+  try {
+    const { deleteFromCloudinary } = require('../utils/fileHelper');
+    
+    // Delete main mask
+    if (this.mainMaskPublicId) {
+      await deleteFromCloudinary(this.mainMaskPublicId);
+    }
+    
+    // Delete sub masks
+    for (const mask of this.subMasks || []) {
+      if (mask.publicId) {
+        await deleteFromCloudinary(mask.publicId);
+      }
+    }
+    
+    next();
+  } catch (error) {
+    next(error);
   }
 });
 

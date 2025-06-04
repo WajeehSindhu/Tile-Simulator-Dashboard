@@ -7,7 +7,7 @@ const AddTiles = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // Get tile ID from URL if editing
   const isEditing = Boolean(id);
-  
+
   const {
     addTile,
     updateTile,
@@ -25,7 +25,7 @@ const AddTiles = () => {
     tileLoading: loading,
   } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const emptyFormState = {
     tileName: "",
     category: "",
     mainMask: null,
@@ -35,25 +35,107 @@ const AddTiles = () => {
     scale: "1",
     tileMasks: [],
     tileMaskColors: [],
-  });
-
-  const [mainMaskPreview, setMainMaskPreview] = useState(null);
-  const [tileMaskPreviews, setTileMaskPreviews] = useState([]);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [currentColorTarget, setCurrentColorTarget] = useState(null);
-
-  // Add state for color previews
-  const [selectedColorHexCodes, setSelectedColorHexCodes] = useState({
-    main: "",
-    masks: []
-  });
-
-  // Helper function to get hex code for a color ID
-  const getColorHexCode = (colorId) => {
-    const color = tileColors.find(c => c._id === colorId);
-    return color ? color.hexCode : "";
   };
 
+  // Initialize state from localStorage or default values
+  const getInitialFormData = () => {
+    if (isEditing) {
+      return emptyFormState;
+    }
+
+    // Always start with empty form for new tiles
+    return emptyFormState;
+  };
+
+  const getInitialPreviews = () => {
+    if (isEditing) return { main: null, masks: [] };
+    return { main: null, masks: [] };
+  };
+
+  const getInitialColorHexCodes = () => {
+    if (isEditing) return { main: "", masks: [] };
+    return { main: "", masks: [] };
+  };
+
+  const [formData, setFormData] = useState(getInitialFormData());
+  const [mainMaskPreview, setMainMaskPreview] = useState(getInitialPreviews().main);
+  const [tileMaskPreviews, setTileMaskPreviews] = useState(getInitialPreviews().masks);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [currentColorTarget, setCurrentColorTarget] = useState(null);
+  const [selectedColorHexCodes, setSelectedColorHexCodes] = useState(getInitialColorHexCodes());
+
+  // Save form data while working
+  useEffect(() => {
+    if (!isEditing && formData.tileName) { // Only save if there's actual data
+      localStorage.setItem('tileFormData', JSON.stringify(formData));
+    }
+  }, [formData, isEditing]);
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = new FormData();
+      
+      // Validate required fields
+      if (!formData.tileName || !formData.category || !formData.mainMask) {
+        alert("Please fill in all required fields and upload a main mask image.");
+        return;
+      }
+
+      // Append form data
+      data.append("tileName", formData.tileName.trim());
+      data.append("category", formData.category);
+      data.append("backgroundColor", formData.backgroundColor);
+      data.append("groutShape", formData.groutShape);
+      data.append("shapeStyle", formData.shapeStyle);
+      data.append("scale", formData.scale);
+
+      // Append main mask file
+      if (formData.mainMask instanceof File) {
+        data.append("mainMask", formData.mainMask);
+      }
+
+      // Append tile masks and their colors
+      if (formData.tileMasks && formData.tileMasks.length > 0) {
+        formData.tileMasks.forEach((file, index) => {
+          if (file instanceof File) {
+            data.append("tileMasks", file);
+            data.append("tileMaskColors", formData.tileMaskColors[index] || "");
+          }
+        });
+      }
+
+      if (isEditing) {
+        await updateTile(id, data);
+        alert("Tile updated successfully!");
+      } else {
+        await addTile(data);
+        // Clear all storage
+        localStorage.removeItem('tileFormData');
+        localStorage.removeItem('tilePreviews');
+        localStorage.removeItem('tileColorHexCodes');
+        localStorage.removeItem('tileMaskData');
+        localStorage.removeItem('tileFileData');
+        
+        // Reset form state
+        setFormData(emptyFormState);
+        setMainMaskPreview(null);
+        setTileMaskPreviews([]);
+        setSelectedColorHexCodes({ main: "", masks: [] });
+        
+        alert("Tile added successfully!");
+      }
+
+      navigate("/dashboard/all-tiles");
+    } catch (err) {
+      console.error("Error submitting tile:", err);
+      alert("Failed to submit tile. Please check all required fields and try again.");
+    }
+  };
+
+  // Load existing tile data if editing
   useEffect(() => {
     let isMounted = true;
 
@@ -62,12 +144,12 @@ const AddTiles = () => {
         await Promise.all([
           fetchTileColors(),
           fetchTileCategories(),
-          fetchTiles()
+          fetchTiles(),
         ]);
 
-        // If editing, populate form with tile data
+        // Only populate form if editing an existing tile
         if (isEditing && tiles) {
-          const tileToEdit = tiles.find(t => t._id === id);
+          const tileToEdit = tiles.find((t) => t._id === id);
           if (tileToEdit) {
             setFormData({
               tileName: tileToEdit.tileName || "",
@@ -76,28 +158,26 @@ const AddTiles = () => {
               groutShape: tileToEdit.groutShape || "Square",
               shapeStyle: tileToEdit.shapeStyle || "Square",
               scale: tileToEdit.scale || "1",
-              mainMask: null, // Don't set file objects
-              tileMasks: [], // Don't set file objects
+              mainMask: null,
+              tileMasks: [],
               tileMaskColors: tileToEdit.tileMaskColors || [],
             });
 
-            // Set previews for existing images
             if (tileToEdit.mainMask) {
-              setMainMaskPreview(`http://localhost:5000/uploads/${tileToEdit.mainMask}`);
+              setMainMaskPreview(tileToEdit.mainMask);
             }
-            
-            if (tileToEdit.tileMasks && tileToEdit.tileMasks.length > 0) {
+
+            if (tileToEdit.subMasks && tileToEdit.subMasks.length > 0) {
               setTileMaskPreviews(
-                tileToEdit.tileMasks.map(mask => 
-                  `http://localhost:5000/${mask.image}`
-                )
+                tileToEdit.subMasks.map((mask) => mask.image)
               );
             }
 
-            // Set color previews
             setSelectedColorHexCodes({
               main: getColorHexCode(tileToEdit.backgroundColor),
-              masks: tileToEdit.tileMaskColors.map(colorId => getColorHexCode(colorId))
+              masks: tileToEdit.tileMaskColors.map((colorId) =>
+                getColorHexCode(colorId)
+              ),
             });
           }
         }
@@ -115,6 +195,12 @@ const AddTiles = () => {
     };
   }, [id, isEditing]);
 
+  // Helper function to get hex code for a color ID
+  const getColorHexCode = (colorId) => {
+    const color = tileColors.find((c) => c._id === colorId);
+    return color ? color.hexCode : "";
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -129,9 +215,9 @@ const AddTiles = () => {
         ...prev,
         backgroundColor: color._id,
       }));
-      setSelectedColorHexCodes(prev => ({
+      setSelectedColorHexCodes((prev) => ({
         ...prev,
-        main: color.hexCode
+        main: color.hexCode,
       }));
     } else if (typeof currentColorTarget === "number") {
       setFormData((prev) => ({
@@ -140,11 +226,11 @@ const AddTiles = () => {
           idx === currentColorTarget ? color._id : c
         ),
       }));
-      setSelectedColorHexCodes(prev => ({
+      setSelectedColorHexCodes((prev) => ({
         ...prev,
         masks: prev.masks.map((hex, idx) =>
           idx === currentColorTarget ? color.hexCode : hex
-        )
+        ),
       }));
     }
     setShowColorPicker(false);
@@ -171,95 +257,85 @@ const AddTiles = () => {
       const newFile = files[0];
       const dataUrl = await readFileAsDataURL(newFile);
 
-      setFormData((prev) => ({
-        ...prev,
-        tileMasks: [...prev.tileMasks, newFile],
-        tileMaskColors: [...prev.tileMaskColors, ""],
-      }));
-      setTileMaskPreviews((prev) => [...prev, dataUrl]);
-      setSelectedColorHexCodes(prev => ({
-        ...prev,
-        masks: [...prev.masks, ""]
-      }));
+      // Update form data with new mask
+      setFormData((prev) => {
+        const newFormData = {
+          ...prev,
+          tileMasks: [...prev.tileMasks, newFile],
+          tileMaskColors: [...prev.tileMaskColors, ""],
+        };
+        return newFormData;
+      });
+
+      // Update previews
+      setTileMaskPreviews((prev) => {
+        const newPreviews = [...prev, dataUrl];
+        // Save updated previews to localStorage
+        localStorage.setItem('tilePreviews', JSON.stringify({
+          main: mainMaskPreview,
+          masks: newPreviews
+        }));
+        return newPreviews;
+      });
+
+      setSelectedColorHexCodes((prev) => {
+        const newColorHexCodes = {
+          ...prev,
+          masks: [...prev.masks, ""],
+        };
+        // Save updated color hex codes to localStorage
+        localStorage.setItem('tileColorHexCodes', JSON.stringify(newColorHexCodes));
+        return newColorHexCodes;
+      });
     }
   };
 
   const removeTileMask = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      tileMasks: prev.tileMasks.filter((_, idx) => idx !== index),
-      tileMaskColors: prev.tileMaskColors.filter((_, idx) => idx !== index),
-    }));
-    setTileMaskPreviews((prev) => prev.filter((_, idx) => idx !== index));
-    setSelectedColorHexCodes(prev => ({
-      ...prev,
-      masks: prev.masks.filter((_, idx) => idx !== index)
-    }));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      tileName: "",
-      category: "",
-      mainMask: null,
-      backgroundColor: "",
-      groutShape: "Square",
-      shapeStyle: "Square",
-      scale: "1",
-      tileMasks: [],
-      tileMaskColors: [],
+    setFormData((prev) => {
+      const newFormData = {
+        ...prev,
+        tileMasks: prev.tileMasks.filter((_, idx) => idx !== index),
+        tileMaskColors: prev.tileMaskColors.filter((_, idx) => idx !== index),
+      };
+      // Save updated mask colors to localStorage
+      localStorage.setItem('tileMaskData', JSON.stringify({
+        tileMaskColors: newFormData.tileMaskColors,
+      }));
+      return newFormData;
     });
-    setMainMaskPreview(null);
-    setTileMaskPreviews([]);
-    setSelectedColorHexCodes({
-      main: "",
-      masks: []
+
+    setTileMaskPreviews((prev) => {
+      const newPreviews = prev.filter((_, idx) => idx !== index);
+      // Save updated previews to localStorage
+      localStorage.setItem('tilePreviews', JSON.stringify({
+        main: mainMaskPreview,
+        masks: newPreviews
+      }));
+      return newPreviews;
     });
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const data = new FormData();
-      data.append("tileName", formData.tileName);
-      data.append("category", formData.category);
-      data.append("backgroundColor", formData.backgroundColor);
-      data.append("groutShape", formData.groutShape);
-      data.append("shapeStyle", formData.shapeStyle);
-      data.append("scale", formData.scale);
-
-      if (formData.mainMask) {
-        data.append("mainMask", formData.mainMask);
-      }
-
-      formData.tileMasks.forEach((file, index) => {
-        data.append("tileMasks", file);
-        data.append("tileMaskColors", formData.tileMaskColors[index] || "");
-      });
-
-      if (isEditing) {
-        await updateTile(id, data);
-        alert("Tile updated successfully!");
-      } else {
-        await addTile(data);
-        resetForm();
-        alert("Tile added successfully!");
-      }
-      
-      navigate("/dashboard/all-tiles");
-    } catch (err) {
-      console.error(err);
-    }
+    setSelectedColorHexCodes((prev) => {
+      const newColorHexCodes = {
+        ...prev,
+        masks: prev.masks.filter((_, idx) => idx !== index),
+      };
+      // Save updated color hex codes to localStorage
+      localStorage.setItem('tileColorHexCodes', JSON.stringify(newColorHexCodes));
+      return newColorHexCodes;
+    });
   };
 
   return (
     <>
       <Helmet>
-        <title>{isEditing ? "Edit Tile" : "Add New Tile"} - Lili Tile Customizer</title>
+        <title>
+          {isEditing ? "Edit Tile" : "Add New Tile"} - Lili Tile Customizer
+        </title>
         <meta
           name="description"
-          content={`${isEditing ? "Edit existing" : "Add new"} tile in the Lili Tile Customizer.`}
+          content={`${
+            isEditing ? "Edit existing" : "Add new"
+          } tile in the Lili Tile Customizer.`}
         />
       </Helmet>
 
@@ -277,7 +353,10 @@ const AddTiles = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-lg shadow p-6"
+          >
             {/* Top Section: Name and Category */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Tile Name */}
@@ -334,9 +413,9 @@ const AddTiles = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Main Mask
                 </label>
-                <div className="max-w-md overflow-hidden ">
+                <div className="w-full max-w-md overflow-hidden">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg hover:border-[#bd5b4c] transition-colors">
-                    <div className="relative w-full h-80">
+                    <div className="relative w-full h-42 sm:h-60 ">
                       <input
                         type="file"
                         name="mainMask"
@@ -349,10 +428,10 @@ const AddTiles = () => {
                         <img
                           src={mainMaskPreview}
                           alt="Main mask preview"
-                          className="w-full h-full object-cover rounded-lg "
+                          className="w-full h-full object-cover rounded-lg"
                         />
                       ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center max-h-60">
                           <svg
                             className="w-8 h-8 text-gray-400"
                             fill="none"
@@ -395,7 +474,9 @@ const AddTiles = () => {
                       {formData.backgroundColor && (
                         <div
                           className="w-6 h-6 rounded-full border shadow-sm"
-                          style={{ backgroundColor: selectedColorHexCodes.main }}
+                          style={{
+                            backgroundColor: selectedColorHexCodes.main,
+                          }}
                         />
                       )}
                     </div>
@@ -477,15 +558,15 @@ const AddTiles = () => {
             {/* Tile Masks Section */}
             <div className="mt-8">
               <h2 className="text-lg font-medium mb-4">Tile Masks</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4  gap-4">
                 {/* Existing Masks */}
                 {formData.tileMasks.map((_, index) => (
                   <div key={index} className="border-2 rounded-lg">
-                    <div className="relative  w-full h-52">
+                    <div className="relative  w-full h-auto">
                       <img
                         src={tileMaskPreviews[index]}
                         alt={`Tile mask ${index + 1}`}
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-contain rounded-lg"
                       />
                       <button
                         type="button"
@@ -525,7 +606,8 @@ const AddTiles = () => {
                             <div
                               className="w-4 h-4 rounded-full border shadow-sm"
                               style={{
-                                backgroundColor: selectedColorHexCodes.masks[index]
+                                backgroundColor:
+                                  selectedColorHexCodes.masks[index],
                               }}
                             />
                           )}
@@ -612,7 +694,8 @@ const AddTiles = () => {
                           className={`w-12 h-12 rounded-lg border-2 hover:scale-110 transition-transform ${
                             (currentColorTarget === "main"
                               ? formData.backgroundColor
-                              : formData.tileMaskColors[currentColorTarget]) === color._id
+                              : formData.tileMaskColors[currentColorTarget]) ===
+                            color._id
                               ? "border-[#bd5b4c]"
                               : "border-gray-200"
                           }`}
@@ -635,7 +718,9 @@ const AddTiles = () => {
                   loading ? "opacity-50 cursor-not-allowed" : ""
                 } bg-[#bd5b4c] text-white px-6 py-2 rounded hover:bg-red-700 transition-colors`}
               >
-                {loading ? "Adding..." : "Add Tile"}
+                {loading 
+                  ? (isEditing ? "Updating..." : "Adding...") 
+                  : (isEditing ? "Update Tile" : "Add Tile")}
               </button>
               <button
                 type="button"
