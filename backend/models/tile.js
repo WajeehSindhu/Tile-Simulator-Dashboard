@@ -2,48 +2,39 @@ const mongoose = require('mongoose');
 
 const subMaskSchema = new mongoose.Schema({
   image: {
-    type: String,  // Path to stored image file
-    required: true
+    type: String  // Path to stored image file
   },
   publicId: {
-    type: String,  // Cloudinary public ID
-    required: true
+    type: String  // Cloudinary public ID
   },
   backgroundColor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Color',
-    required: true
+    ref: 'Color'
   }
 });
 
 const tileSchema = new mongoose.Schema({
   tileName: {
     type: String,
-    required: true,
     trim: true
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'TileCategory',
-    required: true
+    ref: 'TileCategory'
   },
   mainMask: {
-    type: String,  // Path to stored image file
-    required: true
+    type: String  // Path to stored image file
   },
   mainMaskPublicId: {
-    type: String,  // Cloudinary public ID
-    required: true
+    type: String  // Cloudinary public ID
   },
   backgroundColor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Color',
-    required: true
+    ref: 'Color'
   },
   groutShape: {
     type: String,
-    enum: ['Square', 'No Grout', 'H2 Lines'],
-    required: true
+    enum: ['Square', 'No Grout', 'H2 Lines']
   },
   shapeStyle: {
     type: String,
@@ -55,12 +46,10 @@ const tileSchema = new mongoose.Schema({
       'Triangle',
       'Rectangle 4x8',
       'Arabesquare'
-    ],
-    required: true
+    ]
   },
   scale: {
     type: Number,
-    required: true,
     min: 0.1,
     max: 10
   },

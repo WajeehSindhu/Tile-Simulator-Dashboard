@@ -181,7 +181,20 @@ exports.updateTile = async (req, res) => {
       return res.status(404).json({ error: "Tile not found" });
     }
 
-    // Only validate category if it's being updated
+    // Create update object with existing data
+    const updateData = {
+      tileName: tileName || tile.tileName,
+      category: category || tile.category,
+      backgroundColor: backgroundColor || tile.backgroundColor,
+      groutShape: groutShape || tile.groutShape,
+      shapeStyle: shapeStyle || tile.shapeStyle,
+      scale: scale !== undefined ? parseFloat(scale) : tile.scale,
+      mainMask: tile.mainMask,
+      mainMaskPublicId: tile.mainMaskPublicId,
+      subMasks: tile.subMasks
+    };
+
+    // Validate category if provided
     if (category) {
       const tileCategory = await TileCategory.findById(category);
       if (!tileCategory) {
@@ -190,10 +203,9 @@ exports.updateTile = async (req, res) => {
           details: "The selected category does not exist in the database"
         });
       }
-      tile.category = category;
     }
 
-    // Only validate backgroundColor if it's being updated
+    // Validate color if provided
     if (backgroundColor) {
       const color = await Color.findById(backgroundColor);
       if (!color) {
@@ -202,32 +214,35 @@ exports.updateTile = async (req, res) => {
           details: "The selected background color does not exist in the database"
         });
       }
-      tile.backgroundColor = backgroundColor;
     }
 
-    // Update mainMask if provided
+    // Handle main mask update if new file is uploaded
     if (req.files?.mainMask?.[0]) {
       // Delete old main mask from Cloudinary
       if (tile.mainMaskPublicId) {
         await deleteFromCloudinary(tile.mainMaskPublicId);
       }
-      tile.mainMask = req.files.mainMask[0].path;
-      tile.mainMaskPublicId = req.files.mainMask[0].filename;
+      updateData.mainMask = req.files.mainMask[0].path;
+      updateData.mainMaskPublicId = req.files.mainMask[0].filename;
     }
 
-    // Update subMasks if new masks are provided
+    // Handle submasks update if new files or colors are provided
     if (req.files?.tileMasks || req.body.tileMaskColors) {
-      const tileMasks = req.files.tileMasks || [];
+      const tileMasks = req.files?.tileMasks || [];
       const tileMaskColors = Array.isArray(req.body.tileMaskColors)
         ? req.body.tileMaskColors
         : req.body.tileMaskColors
         ? [req.body.tileMaskColors]
         : [];
 
-      // Validate colors if new masks are being added
+      // If new masks are uploaded
       if (tileMasks.length > 0) {
         // Validate matching number of masks and colors
         if (tileMasks.length !== tileMaskColors.length) {
+          // Clean up any newly uploaded files
+          for (const mask of tileMasks) {
+            await deleteFromCloudinary(mask.filename);
+          }
           return res.status(400).json({
             error: "Mismatched masks and colors",
             details: `Number of tile masks (${tileMasks.length}) does not match number of colors (${tileMaskColors.length})`
@@ -238,6 +253,10 @@ exports.updateTile = async (req, res) => {
         for (const colorId of tileMaskColors) {
           const exists = await Color.findById(colorId);
           if (!exists) {
+            // Clean up any newly uploaded files
+            for (const mask of tileMasks) {
+              await deleteFromCloudinary(mask.filename);
+            }
             return res.status(400).json({
               error: "Invalid sub mask color selected",
               details: `Color ID ${colorId} does not exist in the database`
@@ -253,34 +272,42 @@ exports.updateTile = async (req, res) => {
         }
 
         // Create new submasks array
-        tile.subMasks = tileMasks.map((mask, index) => ({
+        updateData.subMasks = tileMasks.map((mask, index) => ({
           image: mask.path,
           publicId: mask.filename,
           backgroundColor: tileMaskColors[index]
         }));
+      } else if (tileMaskColors.length > 0) {
+        // If only colors are being updated (no new files)
+        updateData.subMasks = tile.subMasks.map((mask, index) => ({
+          ...mask.toObject(),
+          backgroundColor: tileMaskColors[index] || mask.backgroundColor
+        }));
       }
     }
 
-    // Update other fields if provided
-    if (tileName) tile.tileName = tileName;
-    if (groutShape) tile.groutShape = groutShape;
-    if (shapeStyle) tile.shapeStyle = shapeStyle;
-    if (scale !== undefined) tile.scale = parseFloat(scale);
+    // Update the tile with all changes
+    const updatedTile = await Tile.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { 
+        new: true,
+        runValidators: true,
+        context: 'query'
+      }
+    ).populate("backgroundColor", "hexCode")
+     .populate("category", "name")
+     .populate("subMasks.backgroundColor", "hexCode");
 
-    // Save the updated tile
-    await tile.save();
-
-    // Fetch the updated tile with populated fields
-    const updatedTile = await Tile.findById(tile._id)
-      .populate("backgroundColor", "hexCode")
-      .populate("category", "name")
-      .populate("subMasks.backgroundColor", "hexCode");
+    if (!updatedTile) {
+      return res.status(404).json({ error: "Tile not found after update" });
+    }
 
     res.json(updatedTile);
   } catch (error) {
     console.error("Update tile error:", error);
     
-    // Clean up any newly uploaded images if update fails
+    // Clean up any newly uploaded files if update fails
     if (req.files?.mainMask?.[0]) {
       await deleteFromCloudinary(req.files.mainMask[0].filename);
     }

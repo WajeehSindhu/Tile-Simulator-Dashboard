@@ -78,40 +78,64 @@ const AddTiles = () => {
     try {
       const data = new FormData();
       
-      // Validate required fields
-      if (!formData.tileName || !formData.category || !formData.mainMask) {
-        alert("Please fill in all required fields and upload a main mask image.");
-        return;
+      // Different validation for new tiles vs updates
+      if (!isEditing) {
+        // Validate all required fields for new tiles
+        if (!formData.tileName || !formData.category || !formData.mainMask) {
+          alert("Please fill in all required fields and upload a main mask image.");
+          return;
+        }
+      } else {
+        // For updates, only validate if the field has been changed
+        if (!formData.tileName) {
+          alert("Tile name is required.");
+          return;
+        }
       }
 
       // Append form data
       data.append("tileName", formData.tileName.trim());
-      data.append("category", formData.category);
-      data.append("backgroundColor", formData.backgroundColor);
-      data.append("groutShape", formData.groutShape);
-      data.append("shapeStyle", formData.shapeStyle);
-      data.append("scale", formData.scale);
+      if (formData.category) data.append("category", formData.category);
+      if (formData.backgroundColor) {
+        // Make sure we're sending the ID string, not an object
+        const colorId = typeof formData.backgroundColor === 'object' ? formData.backgroundColor._id : formData.backgroundColor;
+        data.append("backgroundColor", colorId);
+      }
+      if (formData.groutShape) data.append("groutShape", formData.groutShape);
+      if (formData.shapeStyle) data.append("shapeStyle", formData.shapeStyle);
+      if (formData.scale) data.append("scale", formData.scale);
 
-      // Append main mask file
+      // Append main mask file only if it's provided
       if (formData.mainMask instanceof File) {
         data.append("mainMask", formData.mainMask);
       }
 
-      // Append tile masks and their colors
+      // Append tile masks and their colors only if both are provided
       if (formData.tileMasks && formData.tileMasks.length > 0) {
         formData.tileMasks.forEach((file, index) => {
           if (file instanceof File) {
             data.append("tileMasks", file);
-            data.append("tileMaskColors", formData.tileMaskColors[index] || "");
+            if (!formData.tileMaskColors[index]) {
+              throw new Error("Please select a color for all tile masks.");
+            }
+            // Make sure we're sending the ID string for tile mask colors as well
+            const colorId = typeof formData.tileMaskColors[index] === 'object' ? formData.tileMaskColors[index]._id : formData.tileMaskColors[index];
+            data.append("tileMaskColors", colorId);
           }
         });
       }
 
       if (isEditing) {
-        await updateTile(id, data);
+        const response = await updateTile(id, data);
+        if (response?.error) {
+          throw new Error(response.error);
+        }
         alert("Tile updated successfully!");
       } else {
-        await addTile(data);
+        const response = await addTile(data);
+        if (response?.error) {
+          throw new Error(response.error);
+        }
         // Clear all storage
         localStorage.removeItem('tileFormData');
         localStorage.removeItem('tilePreviews');
@@ -131,7 +155,8 @@ const AddTiles = () => {
       navigate("/dashboard/all-tiles");
     } catch (err) {
       console.error("Error submitting tile:", err);
-      alert("Failed to submit tile. Please check all required fields and try again.");
+      // Show the specific error message from the backend if available
+      alert(err.message || "Failed to submit tile. Please check all required fields and try again.");
     }
   };
 
@@ -370,7 +395,7 @@ const AddTiles = () => {
                   value={formData.tileName}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
-                  required
+                
                 />
               </div>
 
@@ -389,7 +414,7 @@ const AddTiles = () => {
                     value={formData.category}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
-                    required
+                  
                     disabled={categoryLoading || categoryError}
                   >
                     <option value="">Select Category</option>
@@ -422,7 +447,7 @@ const AddTiles = () => {
                         accept="image/*"
                         onChange={handleFileChange}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        required
+                      
                       />
                       {mainMaskPreview ? (
                         <img
@@ -493,7 +518,7 @@ const AddTiles = () => {
                     value={formData.groutShape}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
-                    required
+                  
                   >
                     <option value="Square">Square</option>
                     <option value="No Grout">No Grout</option>
@@ -511,7 +536,7 @@ const AddTiles = () => {
                     value={formData.shapeStyle}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
-                    required
+                  
                   >
                     <option value="Square">Square</option>
                     <option value="Hexagon">Hexagon</option>
@@ -537,7 +562,7 @@ const AddTiles = () => {
                     max="10"
                     step="0.1"
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
-                    required
+                  
                   />
                   <div className="mt-1 text-sm text-gray-500">
                     <p>

@@ -18,21 +18,13 @@ app.use(cors({
 
 app.use(express.json());
 
-// Serve uploaded files
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-
 // Routes
 app.use('/api/tiles', tileRoutes);
 app.use('/api', authRoutes);
 app.use("/api", tileCategoryRoutes);
 app.use("/api/colors", tileColorRoutes);
 
-// app.use('/api/auth', authRoutes);            // becomes /api/auth/login, /api/auth/register
-// app.use('/api/tiles', tileRoutes);           // stays as is
-// app.use('/api/categories', tileCategoryRoutes);
-// app.use('/api/colors', tileColorRoutes);
+
 
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log('MongoDB connected'))

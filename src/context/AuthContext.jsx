@@ -163,10 +163,16 @@ export const AuthProvider = ({ children }) => {
           },
         }
       );
+      
+      // Check if the response contains an error
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
+      
       setTiles(prev => prev.map(tile => tile._id === id ? response.data : tile));
       return response.data;
     } catch (error) {
-      const errMsg = error.response?.data?.error || "Failed to update tile";
+      const errMsg = error.response?.data?.error || error.message || "Failed to update tile";
       setTileError(errMsg);
       throw new Error(errMsg);
     } finally {
