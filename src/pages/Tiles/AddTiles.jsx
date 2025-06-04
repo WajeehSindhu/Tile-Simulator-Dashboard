@@ -534,7 +534,7 @@ const AddTiles = () => {
                 </label>
                 <div className="w-full max-w-md overflow-hidden">
                   <div className="border-2 border-dashed border-gray-300 rounded-lg hover:border-[#bd5b4c] transition-colors">
-                    <div className="relative w-full h-42 sm:h-60 ">
+                    <div className="relative w-full h-44 sm:h-60 ">
                       <input
                         type="file"
                         name="mainMask"
@@ -547,7 +547,7 @@ const AddTiles = () => {
                         <img
                           src={mainMaskPreview}
                           alt="Main mask preview"
-                          className="w-full h-full object-cover rounded-lg"
+                          className="w-full h-full object-contain sm:object-cover rounded-lg"
                         />
                       ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center max-h-60">
@@ -829,13 +829,13 @@ const AddTiles = () => {
             )}
 
             {/* Submit and Cancel Buttons */}
-            <div className="mt-8 flex gap-4">
+            <div className="mt-8 flex gap-2 sm:gap-4 flex-wrap">
               <button
                 type="submit"
                 disabled={loading}
                 className={`${
                   loading ? "opacity-50 cursor-not-allowed" : ""
-                } bg-[#bd5b4c] text-white px-6 py-2 rounded hover:bg-red-700 transition-colors`}
+                } bg-[#bd5b4c] text-white px-4 py-2 rounded hover:bg-red-700 transition-colors`}
               >
                 {loading 
                   ? (isEditing ? "Updating..." : "Adding...") 
@@ -844,7 +844,7 @@ const AddTiles = () => {
               <button
                 type="button"
                 onClick={() => navigate("/dashboard/all-tiles")}
-                className="bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300 transition-colors"
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition-colors"
               >
                 Cancel
               </button>

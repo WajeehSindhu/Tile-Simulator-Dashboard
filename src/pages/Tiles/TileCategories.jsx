@@ -129,7 +129,7 @@ const TileCategories = () => {
                 onChange={handleChange}
                 className="w-full mb-4 border border-gray-300 rounded p-2"
               />
-              <div className="flex space-x-2">
+              <div className="flex gap-2 flex-wrap ">
                 <button
                   type="submit"
                   className="bg-[#BD5B4C] text-white px-4 py-2 rounded text-sm"
@@ -150,7 +150,7 @@ const TileCategories = () => {
           </div>
 
           {/* Table */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 overflow-x-auto whitespace-nowrap">
             <table className="min-w-full bg-white border border-gray-300 rounded text-sm">
               <thead>
                 <tr className="bg-gray-100">
