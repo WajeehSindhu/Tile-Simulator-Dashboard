@@ -7,12 +7,12 @@ const AddTiles = () => {
   const navigate = useNavigate();
   const { id } = useParams(); // Get tile ID from URL if editing
   const isEditing = Boolean(id);
-
+ 
   const {
     addTile,
     updateTile,
     tiles,
-    fetchTiles,
+    fetchTiles, 
     tileColors,
     fetchTileColors,
     colorLoading,
@@ -40,20 +40,82 @@ const AddTiles = () => {
   // Initialize state from localStorage or default values
   const getInitialFormData = () => {
     if (isEditing) {
-      return emptyFormState;
+      // For edit mode, try to load from edit-specific localStorage
+      const savedFormData = localStorage.getItem('editTileFormData');
+      if (savedFormData) {
+        try {
+          return JSON.parse(savedFormData);
+        } catch (error) {
+          console.error('Error parsing saved edit form data:', error);
+          return emptyFormState;
+        }
+      }
+    } else {
+      // For add mode, try to load from add-specific localStorage
+      const savedFormData = localStorage.getItem('addTileFormData');
+      if (savedFormData) {
+        try {
+          return JSON.parse(savedFormData);
+        } catch (error) {
+          console.error('Error parsing saved add form data:', error);
+          return emptyFormState;
+        }
+      }
     }
-
-    // Always start with empty form for new tiles
     return emptyFormState;
   };
 
   const getInitialPreviews = () => {
-    if (isEditing) return { main: null, masks: [] };
+    if (isEditing) {
+      // For edit mode, try to load from edit-specific localStorage
+      const savedPreviews = localStorage.getItem('editTilePreviews');
+      if (savedPreviews) {
+        try {
+          return JSON.parse(savedPreviews);
+        } catch (error) {
+          console.error('Error parsing saved edit previews:', error);
+          return { main: null, masks: [] };
+        }
+      }
+    } else {
+      // For add mode, try to load from add-specific localStorage
+      const savedPreviews = localStorage.getItem('addTilePreviews');
+      if (savedPreviews) {
+        try {
+          return JSON.parse(savedPreviews);
+        } catch (error) {
+          console.error('Error parsing saved add previews:', error);
+          return { main: null, masks: [] };
+        }
+      }
+    }
     return { main: null, masks: [] };
   };
 
   const getInitialColorHexCodes = () => {
-    if (isEditing) return { main: "", masks: [] };
+    if (isEditing) {
+      // For edit mode, try to load from edit-specific localStorage
+      const savedColorHexCodes = localStorage.getItem('editTileColorHexCodes');
+      if (savedColorHexCodes) {
+        try {
+          return JSON.parse(savedColorHexCodes);
+        } catch (error) {
+          console.error('Error parsing saved edit color hex codes:', error);
+          return { main: "", masks: [] };
+        }
+      }
+    } else {
+      // For add mode, try to load from add-specific localStorage
+      const savedColorHexCodes = localStorage.getItem('addTileColorHexCodes');
+      if (savedColorHexCodes) {
+        try {
+          return JSON.parse(savedColorHexCodes);
+        } catch (error) {
+          console.error('Error parsing saved add color hex codes:', error);
+          return { main: "", masks: [] };
+        }
+      }
+    }
     return { main: "", masks: [] };
   };
 
@@ -66,10 +128,108 @@ const AddTiles = () => {
 
   // Save form data while working
   useEffect(() => {
-    if (!isEditing && formData.tileName) { // Only save if there's actual data
-      localStorage.setItem('tileFormData', JSON.stringify(formData));
+    if (formData.tileName) {
+      if (isEditing) {
+        localStorage.setItem('editTileFormData', JSON.stringify(formData));
+      } else {
+        localStorage.setItem('addTileFormData', JSON.stringify(formData));
+      }
     }
   }, [formData, isEditing]);
+
+  // Save previews when they change
+  useEffect(() => {
+    if (isEditing) {
+      localStorage.setItem('editTilePreviews', JSON.stringify({
+        main: mainMaskPreview,
+        masks: tileMaskPreviews
+      }));
+    } else {
+      localStorage.setItem('addTilePreviews', JSON.stringify({
+        main: mainMaskPreview,
+        masks: tileMaskPreviews
+      }));
+    }
+  }, [mainMaskPreview, tileMaskPreviews, isEditing]);
+
+  // Save color hex codes when they change
+  useEffect(() => {
+    if (isEditing) {
+      localStorage.setItem('editTileColorHexCodes', JSON.stringify(selectedColorHexCodes));
+    } else {
+      localStorage.setItem('addTileColorHexCodes', JSON.stringify(selectedColorHexCodes));
+    }
+  }, [selectedColorHexCodes, isEditing]);
+
+  // Load existing tile data if editing
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      try {
+        await Promise.all([
+          fetchTileColors(),
+          fetchTileCategories(),
+          fetchTiles(),
+        ]);
+
+        // Only populate form if editing an existing tile
+        if (isEditing && tiles && isMounted) {
+          const tileToEdit = tiles.find((t) => t._id === id);
+          if (tileToEdit) {
+            const newFormData = {
+              tileName: tileToEdit.tileName || "",
+              category: tileToEdit.category?._id || "",
+              backgroundColor: tileToEdit.backgroundColor || "",
+              groutShape: tileToEdit.groutShape || "Square",
+              shapeStyle: tileToEdit.shapeStyle || "Square",
+              scale: tileToEdit.scale || "1",
+              mainMask: null,
+              tileMasks: [],
+              tileMaskColors: tileToEdit.tileMaskColors || [],
+            };
+
+            setFormData(newFormData);
+            // Save to edit-specific localStorage
+            localStorage.setItem('editTileFormData', JSON.stringify(newFormData));
+
+            if (tileToEdit.mainMask) {
+              setMainMaskPreview(tileToEdit.mainMask);
+              localStorage.setItem('editTilePreviews', JSON.stringify({
+                main: tileToEdit.mainMask,
+                masks: tileToEdit.subMasks?.map(mask => mask.image) || []
+              }));
+            }
+
+            if (tileToEdit.subMasks && tileToEdit.subMasks.length > 0) {
+              setTileMaskPreviews(
+                tileToEdit.subMasks.map((mask) => mask.image)
+              );
+            }
+
+            const newColorHexCodes = {
+              main: getColorHexCode(tileToEdit.backgroundColor),
+              masks: tileToEdit.tileMaskColors.map((colorId) =>
+                getColorHexCode(colorId)
+              ),
+            };
+            setSelectedColorHexCodes(newColorHexCodes);
+            localStorage.setItem('editTileColorHexCodes', JSON.stringify(newColorHexCodes));
+          }
+        }
+      } catch (error) {
+        console.error("Error in initial data fetch:", error);
+      }
+    };
+
+    if (isMounted) {
+      fetchData();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id, isEditing]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -130,95 +290,29 @@ const AddTiles = () => {
         if (response?.error) {
           throw new Error(response.error);
         }
+        // Clear edit-specific storage
+        localStorage.removeItem('editTileFormData');
+        localStorage.removeItem('editTilePreviews');
+        localStorage.removeItem('editTileColorHexCodes');
         alert("Tile updated successfully!");
       } else {
         const response = await addTile(data);
         if (response?.error) {
           throw new Error(response.error);
         }
-        // Clear all storage
-        localStorage.removeItem('tileFormData');
-        localStorage.removeItem('tilePreviews');
-        localStorage.removeItem('tileColorHexCodes');
-        localStorage.removeItem('tileMaskData');
-        localStorage.removeItem('tileFileData');
-        
-        // Reset form state
-        setFormData(emptyFormState);
-        setMainMaskPreview(null);
-        setTileMaskPreviews([]);
-        setSelectedColorHexCodes({ main: "", masks: [] });
-        
+        // Clear add-specific storage
+        localStorage.removeItem('addTileFormData');
+        localStorage.removeItem('addTilePreviews');
+        localStorage.removeItem('addTileColorHexCodes');
         alert("Tile added successfully!");
       }
 
       navigate("/dashboard/all-tiles");
     } catch (err) {
       console.error("Error submitting tile:", err);
-      // Show the specific error message from the backend if available
       alert(err.message || "Failed to submit tile. Please check all required fields and try again.");
     }
   };
-
-  // Load existing tile data if editing
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchData = async () => {
-      try {
-        await Promise.all([
-          fetchTileColors(),
-          fetchTileCategories(),
-          fetchTiles(),
-        ]);
-
-        // Only populate form if editing an existing tile
-        if (isEditing && tiles) {
-          const tileToEdit = tiles.find((t) => t._id === id);
-          if (tileToEdit) {
-            setFormData({
-              tileName: tileToEdit.tileName || "",
-              category: tileToEdit.category?._id || "",
-              backgroundColor: tileToEdit.backgroundColor || "",
-              groutShape: tileToEdit.groutShape || "Square",
-              shapeStyle: tileToEdit.shapeStyle || "Square",
-              scale: tileToEdit.scale || "1",
-              mainMask: null,
-              tileMasks: [],
-              tileMaskColors: tileToEdit.tileMaskColors || [],
-            });
-
-            if (tileToEdit.mainMask) {
-              setMainMaskPreview(tileToEdit.mainMask);
-            }
-
-            if (tileToEdit.subMasks && tileToEdit.subMasks.length > 0) {
-              setTileMaskPreviews(
-                tileToEdit.subMasks.map((mask) => mask.image)
-              );
-            }
-
-            setSelectedColorHexCodes({
-              main: getColorHexCode(tileToEdit.backgroundColor),
-              masks: tileToEdit.tileMaskColors.map((colorId) =>
-                getColorHexCode(colorId)
-              ),
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error in initial data fetch:", error);
-      }
-    };
-
-    if (isMounted) {
-      fetchData();
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [id, isEditing]);
 
   // Helper function to get hex code for a color ID
   const getColorHexCode = (colorId) => {
@@ -337,7 +431,7 @@ const AddTiles = () => {
         masks: newPreviews
       }));
       return newPreviews;
-    });
+    }); 
 
     setSelectedColorHexCodes((prev) => {
       const newColorHexCodes = {
