@@ -128,8 +128,7 @@ const AllTiles = () => {
                           <div className="h-full w-full rounded-lg overflow-hidden">
                             {tile.mainMask ? (
                               <img
-                                src={`http://localhost:5000/${tile.mainMask}`}
-                                alt={tile.tileName}
+                                 src={`http://localhost:5000/uploads/${tile.mainMask}`} alt={tile.tileName}
                                 className="h-full w-full object-cover"
                                 onError={(e) => {
                                   e.target.onerror = null;

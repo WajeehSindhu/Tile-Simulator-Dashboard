@@ -83,7 +83,7 @@ const AddTiles = () => {
 
             // Set previews for existing images
             if (tileToEdit.mainMask) {
-              setMainMaskPreview(`http://localhost:5000/${tileToEdit.mainMask}`);
+              setMainMaskPreview(`http://localhost:5000/uploads/${tileToEdit.mainMask}`);
             }
             
             if (tileToEdit.tileMasks && tileToEdit.tileMasks.length > 0) {
