@@ -24,6 +24,10 @@ app.use('/api', authRoutes);
 app.use("/api", tileCategoryRoutes);
 app.use("/api/colors", tileColorRoutes);
 
+app.get("/", (req, res) => {
+  res.send("Backend is live!");
+});
+
 
 
 mongoose.connect(process.env.MONGO_URL)
