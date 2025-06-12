@@ -72,6 +72,7 @@ const Navbar = () => {
                   <img
                     src={userImage}
                     alt="User"
+                    onError={() => setUserImage("")}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -81,13 +82,26 @@ const Navbar = () => {
 
               {/* Dropdown */}
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-white rounded-md shadow-lg z-50 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-44 bg-white rounded-md shadow-lg z-50 overflow-hidden transition-all duration-200">
                   <button
                     onClick={triggerImageUpload}
                     className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    Change Photo
+                    {userImage ? "Change Profile" : "Add Profile"}
                   </button>
+
+                  {/* Remove Photo button */}
+                  {userImage && (
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("userImage");
+                        setUserImage("");
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Remove Profile
+                    </button>
+                  )}
                   <button
                     onClick={signOut}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
