@@ -39,36 +39,35 @@ exports.forgotPassword = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
-  const frontendBaseURL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const resetLink = `${frontendBaseURL}/reset-password/${token}`;
+    const frontendBaseURL = 'https://tile-simulator-dashboard.onrender.com';
+    const resetLink = `${frontendBaseURL}/reset-password/${token}`;
 
-  const html = `
-   <div style="margin: 20px 10px;">
-  <img src="http://localhost:5173/Images/logo.png" alt="Sight Logo" style="max-width: 100px; margin-bottom: 5px;" />
-  <h3>Password Reset</h3>
-  <p>Hello ${user.userName},</p>
-  <p>You requested a password reset. Click the button below to set a new password:</p>
-  <div style="margin: 20px 0;">
-    <a
-      href="${resetLink}"
-      style="
-        padding: 12px 16px;
-        font-size: 16px;
-        color: white;
-        background-color: #bd5b4c;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: light;
-        font-family: poppins;
-      "
-    >
-      Verify Mail 
-    </a>
-  </div>
-  <p>This link will expire in 15 minutes.</p>
-   </div>
-`;
-
+    const html = `
+     <div style="margin: 20px 10px;">
+    <img src="https://tile-simulator-dashboard.onrender.com/Images/logo.png" alt="Sight Logo" style="max-width: 100px; margin-bottom: 5px;" />
+    <h3>Password Reset</h3>
+    <p>Hello ${user.userName},</p>
+    <p>You requested a password reset. Click the button below to set a new password:</p>
+    <div style="margin: 20px 0;">
+      <a
+        href="${resetLink}"
+        style="
+          padding: 12px 16px;
+          font-size: 16px;
+          color: white;
+          background-color: #bd5b4c;
+          text-decoration: none;
+          border-radius: 6px;
+          font-weight: light;
+          font-family: poppins;
+        "
+      >
+        Verify Mail 
+      </a>
+    </div>
+    <p>This link will expire in 15 minutes.</p>
+     </div>
+  `;
 
     await sendEmail(user.email, "Password Reset", html);
 

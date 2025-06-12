@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.post("http://localhost:5000/api/signin", {
+      const response = await axios.post("https://tile-simulator-dashboard.onrender.com/api/signin", {
         email: credentials.email,
         password: credentials.password,
       });
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/forgot-password",
+        "https://tile-simulator-dashboard.onrender.com/api/forgot-password",
         { email }
       );
       setMessage(response.data.message);
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
     setMessage(null);
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/reset-password/${token}`,
+        `https://tile-simulator-dashboard.onrender.com/api/reset-password/${token}`,
         {
           password,
           confirmPassword,
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }) => {
     setTileLoading(true);
     setTileError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/tiles");
+      const response = await axios.get("https://tile-simulator-dashboard.onrender.com/api/tiles");
       setTiles(response.data);
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to fetch tiles";
@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }) => {
     setTileError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/tiles",
+        "https://tile-simulator-dashboard.onrender.com/api/tiles",
         formData,
         {
           headers: {
@@ -155,7 +155,7 @@ export const AuthProvider = ({ children }) => {
     setTileError(null);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/tiles/${id}`,
+        `https://tile-simulator-dashboard.onrender.com/api/tiles/${id}`,
         formData,
         {
           headers: {
@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }) => {
     setTileLoading(true);
     setTileError(null);
     try {
-      await axios.delete(`http://localhost:5000/api/tiles/${id}`);
+      await axios.delete(`https://tile-simulator-dashboard.onrender.com/api/tiles/${id}`);
       setTiles(prev => prev.filter(tile => tile._id !== id));
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to delete tile";
@@ -200,7 +200,7 @@ export const AuthProvider = ({ children }) => {
     setColorLoading(true);
     setColorError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/colors");
+      const response = await axios.get("https://tile-simulator-dashboard.onrender.com/api/colors");
       setTileColors(response.data);
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to fetch colors";
@@ -216,7 +216,7 @@ export const AuthProvider = ({ children }) => {
     setColorError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/colors/add",
+        "https://tile-simulator-dashboard.onrender.com/api/colors/add",
         { hexCode }
       );
       setTileColors((prev) => [...prev, response.data]);
@@ -235,7 +235,7 @@ export const AuthProvider = ({ children }) => {
     setColorLoading(true);
     setColorError(null);
     try {
-      await axios.delete(`http://localhost:5000/api/colors/${id}`);
+      await axios.delete(`https://tile-simulator-dashboard.onrender.com/api/colors/${id}`);
       setTileColors((prev) => prev.filter((color) => color._id !== id));
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to delete color";
@@ -250,7 +250,7 @@ export const AuthProvider = ({ children }) => {
     setCategoryLoading(true);
     setCategoryError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/categories");
+      const response = await axios.get("https://tile-simulator-dashboard.onrender.com/api/categories");
       setTileCategories(response.data);
     } catch (error) {
       const errMsg =
@@ -267,7 +267,7 @@ export const AuthProvider = ({ children }) => {
     setCategoryError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/categories",
+        "https://tile-simulator-dashboard.onrender.com/api/categories",
         formData
       );
       setTileCategories((prev) => [...prev, response.data]);
@@ -287,7 +287,7 @@ export const AuthProvider = ({ children }) => {
     setCategoryError(null);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/categories/${id}`,
+        `https://tile-simulator-dashboard.onrender.com/api/categories/${id}`,
         formData
       );
       setTileCategories((prev) =>
@@ -308,7 +308,7 @@ export const AuthProvider = ({ children }) => {
     setCategoryLoading(true);
     setCategoryError(null);
     try {
-      await axios.delete(`http://localhost:5000/api/categories/${id}`);
+      await axios.delete(`https://tile-simulator-dashboard.onrender.com/api/categories/${id}`);
       setTileCategories((prev) => prev.filter((cat) => cat._id !== id));
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to delete category";
@@ -325,7 +325,7 @@ export const AuthProvider = ({ children }) => {
     setColorError(null);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/colors/${id}`,
+        `https://tile-simulator-dashboard.onrender.com/api/colors/${id}`,
         { hexCode }
       );
       setTileColors((prev) =>
