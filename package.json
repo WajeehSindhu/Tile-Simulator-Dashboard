@@ -2,14 +2,12 @@
   "name": "tilesimulator-dashboard",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://wajeehsindhu.github.io/Tile-Simulator-Dashboard",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@fontsource/poppins": "^5.2.6",
