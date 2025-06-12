@@ -125,6 +125,7 @@ const AddTiles = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [currentColorTarget, setCurrentColorTarget] = useState(null);
   const [selectedColorHexCodes, setSelectedColorHexCodes] = useState(getInitialColorHexCodes());
+  const [removedMasks, setRemovedMasks] = useState([]);
 
   // Save form data while working
   useEffect(() => {
@@ -177,16 +178,19 @@ const AddTiles = () => {
         if (isEditing && tiles && isMounted) {
           const tileToEdit = tiles.find((t) => t._id === id);
           if (tileToEdit) {
+            // Get the background color ID
+            const backgroundColorId = tileToEdit.backgroundColor?._id || tileToEdit.backgroundColor;
+            
             const newFormData = {
               tileName: tileToEdit.tileName || "",
               category: tileToEdit.category?._id || "",
-              backgroundColor: tileToEdit.backgroundColor || "",
+              backgroundColor: backgroundColorId,
               groutShape: tileToEdit.groutShape || "Square",
               shapeStyle: tileToEdit.shapeStyle || "Square",
               scale: tileToEdit.scale || "1",
               mainMask: null,
-              tileMasks: [],
-              tileMaskColors: tileToEdit.tileMaskColors || [],
+              tileMasks: tileToEdit.subMasks?.map(mask => mask.image) || [],
+              tileMaskColors: tileToEdit.subMasks?.map(mask => mask.backgroundColor?._id || mask.backgroundColor) || [],
             };
 
             setFormData(newFormData);
@@ -195,10 +199,6 @@ const AddTiles = () => {
 
             if (tileToEdit.mainMask) {
               setMainMaskPreview(tileToEdit.mainMask);
-              localStorage.setItem('editTilePreviews', JSON.stringify({
-                main: tileToEdit.mainMask,
-                masks: tileToEdit.subMasks?.map(mask => mask.image) || []
-              }));
             }
 
             if (tileToEdit.subMasks && tileToEdit.subMasks.length > 0) {
@@ -207,11 +207,11 @@ const AddTiles = () => {
               );
             }
 
+            // Set background color hex code
+            const backgroundColorHex = tileToEdit.backgroundColor?.hexCode || getColorHexCode(backgroundColorId);
             const newColorHexCodes = {
-              main: getColorHexCode(tileToEdit.backgroundColor),
-              masks: tileToEdit.tileMaskColors.map((colorId) =>
-                getColorHexCode(colorId)
-              ),
+              main: backgroundColorHex,
+              masks: tileToEdit.subMasks?.map(mask => mask.backgroundColor?.hexCode || getColorHexCode(mask.backgroundColor)) || [],
             };
             setSelectedColorHexCodes(newColorHexCodes);
             localStorage.setItem('editTileColorHexCodes', JSON.stringify(newColorHexCodes));
@@ -234,54 +234,38 @@ const AddTiles = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const data = new FormData();
-      
-      // Different validation for new tiles vs updates
-      if (!isEditing) {
-        // Validate all required fields for new tiles
-        if (!formData.tileName || !formData.category || !formData.mainMask) {
-          alert("Please fill in all required fields and upload a main mask image.");
-          return;
-        }
-      } else {
-        // For updates, only validate if the field has been changed
-        if (!formData.tileName) {
-          alert("Tile name is required.");
-          return;
-        }
+
+      // Add basic fields
+      data.append("tileName", formData.tileName);
+      data.append("category", formData.category);
+      data.append("backgroundColor", formData.backgroundColor);
+      data.append("groutShape", formData.groutShape);
+      data.append("shapeStyle", formData.shapeStyle);
+      data.append("scale", formData.scale);
+
+      // Add removed masks if any
+      if (isEditing && removedMasks.length > 0) {
+        data.append("removedMasks", JSON.stringify(removedMasks));
       }
 
-      // Append form data
-      data.append("tileName", formData.tileName.trim());
-      if (formData.category) data.append("category", formData.category);
-      if (formData.backgroundColor) {
-        // Make sure we're sending the ID string, not an object
-        const colorId = typeof formData.backgroundColor === 'object' ? formData.backgroundColor._id : formData.backgroundColor;
-        data.append("backgroundColor", colorId);
-      }
-      if (formData.groutShape) data.append("groutShape", formData.groutShape);
-      if (formData.shapeStyle) data.append("shapeStyle", formData.shapeStyle);
-      if (formData.scale) data.append("scale", formData.scale);
-
-      // Append main mask file only if it's provided
+      // Handle main mask
       if (formData.mainMask instanceof File) {
         data.append("mainMask", formData.mainMask);
       }
 
-      // Append tile masks and their colors only if both are provided
-      if (formData.tileMasks && formData.tileMasks.length > 0) {
+      // Handle tile masks and their colors
+      if (formData.tileMasks.length > 0) {
         formData.tileMasks.forEach((file, index) => {
           if (file instanceof File) {
             data.append("tileMasks", file);
-            if (!formData.tileMaskColors[index]) {
-              throw new Error("Please select a color for all tile masks.");
-            }
-            // Make sure we're sending the ID string for tile mask colors as well
-            const colorId = typeof formData.tileMaskColors[index] === 'object' ? formData.tileMaskColors[index]._id : formData.tileMaskColors[index];
-            data.append("tileMaskColors", colorId);
           }
+          // Always append the color ID, whether it's a new file or existing
+          const colorId = typeof formData.tileMaskColors[index] === 'object' 
+            ? formData.tileMaskColors[index]._id 
+            : formData.tileMaskColors[index];
+          data.append("tileMaskColors", colorId);
         });
       }
 
@@ -416,20 +400,11 @@ const AddTiles = () => {
         tileMasks: prev.tileMasks.filter((_, idx) => idx !== index),
         tileMaskColors: prev.tileMaskColors.filter((_, idx) => idx !== index),
       };
-      // Save updated mask colors to localStorage
-      localStorage.setItem('tileMaskData', JSON.stringify({
-        tileMaskColors: newFormData.tileMaskColors,
-      }));
       return newFormData;
     });
 
     setTileMaskPreviews((prev) => {
       const newPreviews = prev.filter((_, idx) => idx !== index);
-      // Save updated previews to localStorage
-      localStorage.setItem('tilePreviews', JSON.stringify({
-        main: mainMaskPreview,
-        masks: newPreviews
-      }));
       return newPreviews;
     }); 
 
@@ -438,10 +413,13 @@ const AddTiles = () => {
         ...prev,
         masks: prev.masks.filter((_, idx) => idx !== index),
       };
-      // Save updated color hex codes to localStorage
-      localStorage.setItem('tileColorHexCodes', JSON.stringify(newColorHexCodes));
       return newColorHexCodes;
     });
+
+    // Track removed mask index
+    if (isEditing) {
+      setRemovedMasks(prev => [...prev, index.toString()]);
+    }
   };
 
   return (
@@ -574,7 +552,7 @@ const AddTiles = () => {
               {/* Right Column - Settings */}
               <div className="space-y-4">
                 {/* Background Color */}
-                <div>
+                <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Background Color
                   </label>
@@ -584,15 +562,15 @@ const AddTiles = () => {
                       setCurrentColorTarget("main");
                       setShowColorPicker(true);
                     }}
-                    className="w-full px-3 py-2 border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#bd5b4c] flex items-center justify-between group"
+                    className="w-full p-2 border rounded-md bg-gray-300 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#bd5b4c] flex items-center justify-between group"
                   >
-                    <span className="text-sm text-gray-600 group-hover:text-gray-900">
+                    <span className="text-xs text-gray-600 group-hover:text-gray-900">
                       {selectedColorHexCodes.main || "Select Color"}
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       {formData.backgroundColor && (
                         <div
-                          className="w-6 h-6 rounded-full border shadow-sm"
+                          className="w-4 h-4 rounded-full border shadow-sm"
                           style={{
                             backgroundColor: selectedColorHexCodes.main,
                           }}

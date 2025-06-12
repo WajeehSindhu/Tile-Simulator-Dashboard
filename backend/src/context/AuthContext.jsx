@@ -1,6 +1,41 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+// Hardcode the production API URL
+const API_URL = 'https://live-backend-3.onrender.com';
+
+// Configure axios defaults
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+
+// Add axios interceptor for authentication
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Add CORS headers
+    config.headers['Access-Control-Allow-Origin'] = '*';
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle errors
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ERR_NETWORK') {
+      console.error('Network error - please check your connection and try again');
+    }
+    return Promise.reject(error);
+  }
+);
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -36,21 +71,28 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.post("http://localhost:5000/api/signin", {
+      console.log('Attempting to sign in with:', API_URL);
+      const response = await axios.post(`${API_URL}/api/signin`, {
         email: credentials.email,
         password: credentials.password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        withCredentials: true
       });
 
-      // Simulate delay (optional)
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const userData = response.data;
+      const { user: userData, token } = response.data;
       setUser(userData);
       setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", token);
       navigate("/dashboard");
     } catch (error) {
-      setError(error.response?.data?.message || "Sign in failed");
+      console.error('Sign in error:', error);
+      const errorMessage = error.response?.data?.message || "Sign in failed";
+      setError(errorMessage);
       throw error;
     } finally {
       setIsLoading(false);
@@ -61,7 +103,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/forgot-password",
+        `${API_URL}/api/forgot-password`,
         { email }
       );
       setMessage(response.data.message);
@@ -83,7 +125,7 @@ export const AuthProvider = ({ children }) => {
     setMessage(null);
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/reset-password/${token}`,
+        `${API_URL}/api/reset-password/${token}`,
         {
           password,
           confirmPassword,
@@ -116,7 +158,7 @@ export const AuthProvider = ({ children }) => {
     setTileLoading(true);
     setTileError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/tiles");
+      const response = await axios.get(`${API_URL}/api/tiles`);
       setTiles(response.data);
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to fetch tiles";
@@ -131,7 +173,7 @@ export const AuthProvider = ({ children }) => {
     setTileError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/tiles",
+        `${API_URL}/api/tiles`,
         formData,
         {
           headers: {
@@ -155,7 +197,7 @@ export const AuthProvider = ({ children }) => {
     setTileError(null);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/tiles/${id}`,
+        `${API_URL}/api/tiles/${id}`,
         formData,
         {
           headers: {
@@ -164,7 +206,6 @@ export const AuthProvider = ({ children }) => {
         }
       );
       
-      // Check if the response contains an error
       if (response.data.error) {
         throw new Error(response.data.error);
       }
@@ -184,7 +225,7 @@ export const AuthProvider = ({ children }) => {
     setTileLoading(true);
     setTileError(null);
     try {
-      await axios.delete(`http://localhost:5000/api/tiles/${id}`);
+      await axios.delete(`${API_URL}/api/tiles/${id}`);
       setTiles(prev => prev.filter(tile => tile._id !== id));
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to delete tile";
@@ -200,7 +241,7 @@ export const AuthProvider = ({ children }) => {
     setColorLoading(true);
     setColorError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/colors");
+      const response = await axios.get(`${API_URL}/api/colors`);
       setTileColors(response.data);
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to fetch colors";
@@ -216,7 +257,7 @@ export const AuthProvider = ({ children }) => {
     setColorError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/colors/add",
+        `${API_URL}/api/colors/add`,
         { hexCode }
       );
       setTileColors((prev) => [...prev, response.data]);
@@ -235,7 +276,7 @@ export const AuthProvider = ({ children }) => {
     setColorLoading(true);
     setColorError(null);
     try {
-      await axios.delete(`http://localhost:5000/api/colors/${id}`);
+      await axios.delete(`${API_URL}/api/colors/${id}`);
       setTileColors((prev) => prev.filter((color) => color._id !== id));
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to delete color";
@@ -250,7 +291,7 @@ export const AuthProvider = ({ children }) => {
     setCategoryLoading(true);
     setCategoryError(null);
     try {
-      const response = await axios.get("http://localhost:5000/api/categories");
+      const response = await axios.get(`${API_URL}/api/categories`);
       setTileCategories(response.data);
     } catch (error) {
       const errMsg =
@@ -267,7 +308,7 @@ export const AuthProvider = ({ children }) => {
     setCategoryError(null);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/categories",
+        `${API_URL}/api/categories`,
         formData
       );
       setTileCategories((prev) => [...prev, response.data]);
@@ -287,7 +328,7 @@ export const AuthProvider = ({ children }) => {
     setCategoryError(null);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/categories/${id}`,
+        `${API_URL}/api/categories/${id}`,
         formData
       );
       setTileCategories((prev) =>
@@ -308,7 +349,7 @@ export const AuthProvider = ({ children }) => {
     setCategoryLoading(true);
     setCategoryError(null);
     try {
-      await axios.delete(`http://localhost:5000/api/categories/${id}`);
+      await axios.delete(`${API_URL}/api/categories/${id}`);
       setTileCategories((prev) => prev.filter((cat) => cat._id !== id));
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to delete category";
@@ -325,7 +366,7 @@ export const AuthProvider = ({ children }) => {
     setColorError(null);
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/colors/${id}`,
+        `${API_URL}/api/colors/${id}`,
         { hexCode }
       );
       setTileColors((prev) =>

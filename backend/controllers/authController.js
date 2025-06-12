@@ -7,27 +7,72 @@ exports.signIn = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    // Validate request body
+    if (!email || !password) {
+      return res.status(400).json({ 
+        message: "Email and password are required",
+        error: "MISSING_FIELDS"
+      });
+    }
 
+    // Find user and handle case sensitivity
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      return res.status(400).json({ 
+        message: "Invalid email or password",
+        error: "INVALID_CREDENTIALS"
+      });
+    }
+
+    // Verify password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid password" });
+    if (!isMatch) {
+      return res.status(400).json({ 
+        message: "Invalid email or password",
+        error: "INVALID_CREDENTIALS"
+      });
+    }
+
+    // Generate JWT token with more user info
+    const token = jwt.sign(
+      { 
+        id: user._id, 
+        email: user.email, 
+        role: user.role,
+        userName: user.userName
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     // Send user data without sensitive information
     const userData = {
       id: user._id,
       email: user.email,
       userName: user.userName,
-      role: user.role || 'admin'
+      role: user.role,
+      createdAt: user.createdAt
     };
 
+    // Set cookie with token
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
     res.status(200).json({
-      ...userData,
+      user: userData,
+      token,
       message: "Sign-in successful"
     });
   } catch (error) {
     console.error('Sign in error:', error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ 
+      message: "Internal server error",
+      error: "SERVER_ERROR"
+    });
   }
 };
 

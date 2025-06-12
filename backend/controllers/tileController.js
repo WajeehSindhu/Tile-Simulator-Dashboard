@@ -173,6 +173,7 @@ exports.updateTile = async (req, res) => {
       groutShape,
       shapeStyle,
       scale,
+      removedMasks,
     } = req.body;
 
     // Find the existing tile
@@ -194,6 +195,20 @@ exports.updateTile = async (req, res) => {
       subMasks: tile.subMasks
     };
 
+    // Handle removed masks
+    if (removedMasks && Array.isArray(removedMasks)) {
+      // Delete removed masks from Cloudinary
+      for (const maskIndex of removedMasks) {
+        const maskToRemove = tile.subMasks[maskIndex];
+        if (maskToRemove && maskToRemove.publicId) {
+          await deleteFromCloudinary(maskToRemove.publicId);
+        }
+      }
+
+      // Filter out removed masks
+      updateData.subMasks = tile.subMasks.filter((_, index) => !removedMasks.includes(index.toString()));
+    }
+
     // Validate category if provided
     if (category) {
       const tileCategory = await TileCategory.findById(category);
@@ -214,6 +229,8 @@ exports.updateTile = async (req, res) => {
           details: "The selected background color does not exist in the database"
         });
       }
+      // Update the background color
+      updateData.backgroundColor = backgroundColor;
     }
 
     // Handle main mask update if new file is uploaded
@@ -279,6 +296,18 @@ exports.updateTile = async (req, res) => {
         }));
       } else if (tileMaskColors.length > 0) {
         // If only colors are being updated (no new files)
+        // Validate all color IDs first
+        for (const colorId of tileMaskColors) {
+          const exists = await Color.findById(colorId);
+          if (!exists) {
+            return res.status(400).json({
+              error: "Invalid sub mask color selected",
+              details: `Color ID ${colorId} does not exist in the database`
+            });
+          }
+        }
+
+        // Update only the colors while keeping existing images
         updateData.subMasks = tile.subMasks.map((mask, index) => ({
           ...mask.toObject(),
           backgroundColor: tileMaskColors[index] || mask.backgroundColor
