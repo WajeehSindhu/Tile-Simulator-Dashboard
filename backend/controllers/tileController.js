@@ -346,3 +346,41 @@ exports.deleteTile = async (req, res) => {
     res.status(500).json({ error: "Failed to delete tile" });
   }
 };
+
+// Get available grout shapes
+exports.getGroutShapes = async (req, res) => {
+  try {
+    const groutShapes = Tile.schema.path('groutShape').enumValues;
+    res.json(groutShapes);
+  } catch (error) {
+    console.error("Get grout shapes error:", error);
+    res.status(500).json({ error: "Failed to fetch grout shapes" });
+  }
+};
+
+// Get available shape styles
+exports.getShapeStyles = async (req, res) => {
+  try {
+    const shapeStyles = Tile.schema.path('shapeStyle').enumValues;
+    res.json(shapeStyles);
+  } catch (error) {
+    console.error("Get shape styles error:", error);
+    res.status(500).json({ error: "Failed to fetch shape styles" });
+  }
+};
+
+// Get scale range configuration
+exports.getScaleRange = async (req, res) => {
+  try {
+    const scalePath = Tile.schema.path('scale');
+    const scaleRange = {
+      min: scalePath.options.min,
+      max: scalePath.options.max,
+      step: 0.1 // We can keep this as a constant since it's not in the schema
+    };
+    res.json(scaleRange);
+  } catch (error) {
+    console.error("Get scale range error:", error);
+    res.status(500).json({ error: "Failed to fetch scale range" });
+  }
+};

@@ -6,8 +6,20 @@ const {
   getTiles,
   getTileById,
   updateTile,
-  deleteTile
+  deleteTile,
+  getGroutShapes,
+  getShapeStyles,
+  getScaleRange
 } = require("../controllers/tileController");
+
+// Get available grout shapes
+router.get("/grout-shapes", getGroutShapes);
+
+// Get available shape styles
+router.get("/shape-styles", getShapeStyles);
+
+// Get scale range configuration
+router.get("/scale-range", getScaleRange);
 
 // Create a new tile
 router.post(

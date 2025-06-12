@@ -23,6 +23,12 @@ const AddTiles = () => {
     categoryError,
     error,
     tileLoading: loading,
+    groutShapes,
+    shapeStyles,
+    scaleRange,
+    fetchGroutShapes,
+    fetchShapeStyles,
+    fetchScaleRange
   } = useAuth();
 
   const emptyFormState = {
@@ -30,8 +36,8 @@ const AddTiles = () => {
     category: "",
     mainMask: null,
     backgroundColor: "",
-    groutShape: "Square",
-    shapeStyle: "Square",
+    groutShape: "",
+    shapeStyle: "",
     scale: "1",
     tileMasks: [],
     tileMaskColors: [],
@@ -171,6 +177,9 @@ const AddTiles = () => {
           fetchTileColors(),
           fetchTileCategories(),
           fetchTiles(),
+          fetchGroutShapes(),
+          fetchShapeStyles(),
+          fetchScaleRange()
         ]);
 
         // Only populate form if editing an existing tile
@@ -614,9 +623,12 @@ const AddTiles = () => {
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                   
                   >
-                    <option value="Square">Square</option>
-                    <option value="No Grout">No Grout</option>
-                    <option value="H2 Lines">H2 Lines</option>
+                    <option value="">Select Grout Shape</option>
+                    {groutShapes.map((shape) => (
+                      <option key={shape} value={shape}>
+                        {shape}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -632,13 +644,12 @@ const AddTiles = () => {
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                   
                   >
-                    <option value="Square">Square</option>
-                    <option value="Hexagon">Hexagon</option>
-                    <option value="Lola">Lola</option>
-                    <option value="Rectangle 2x8">Rectangle 2x8</option>
-                    <option value="Triangle">Triangle</option>
-                    <option value="Rectangle 4x8">Rectangle 4x8</option>
-                    <option value="Arabesquare">Arabesquare</option>
+                    <option value="">Select Shape Style</option>
+                    {shapeStyles.map((style) => (
+                      <option key={style} value={style}>
+                        {style}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -652,9 +663,9 @@ const AddTiles = () => {
                     name="scale"
                     value={formData.scale}
                     onChange={handleChange}
-                    min="0.1"
-                    max="10"
-                    step="0.1"
+                    min={scaleRange.min}
+                    max={scaleRange.max}
+                    step={scaleRange.step}
                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                   
                   />

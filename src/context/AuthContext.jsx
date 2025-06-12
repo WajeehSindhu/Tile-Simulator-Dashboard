@@ -58,6 +58,9 @@ export const AuthProvider = ({ children }) => {
   const [tileCategories, setTileCategories] = useState([]);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [categoryError, setCategoryError] = useState(null);
+  const [groutShapes, setGroutShapes] = useState([]);
+  const [shapeStyles, setShapeStyles] = useState([]);
+  const [scaleRange, setScaleRange] = useState({ min: 0.1, max: 10, step: 0.1 });
 
   const navigate = useNavigate();
 
@@ -345,6 +348,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const fetchGroutShapes = async () => {
+    try {
+      const response = await api.get("/api/tiles/grout-shapes");
+      setGroutShapes(response.data);
+    } catch (error) {
+      console.error("Error fetching grout shapes:", error);
+    }
+  };
+
+  const fetchShapeStyles = async () => {
+    try {
+      const response = await api.get("/api/tiles/shape-styles");
+      setShapeStyles(response.data);
+    } catch (error) {
+      console.error("Error fetching shape styles:", error);
+    }
+  };
+
+  const fetchScaleRange = async () => {
+    try {
+      const response = await api.get("/api/tiles/scale-range");
+      setScaleRange(response.data);
+    } catch (error) {
+      console.error("Error fetching scale range:", error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -379,6 +409,12 @@ export const AuthProvider = ({ children }) => {
         addTileCategory,
         updateTileCategory,
         deleteTileCategory,
+        groutShapes,
+        shapeStyles,
+        scaleRange,
+        fetchGroutShapes,
+        fetchShapeStyles,
+        fetchScaleRange,
       }}
     >
       {children}
