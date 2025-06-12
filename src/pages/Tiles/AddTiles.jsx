@@ -533,7 +533,7 @@ const AddTiles = () => {
                   Main Mask
                 </label>
                 <div className="w-full max-w-md overflow-hidden">
-                  <div className="w-full h-42 sm:h-60 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#bd5b4c] transition-colors">
+                  <div className="w-full grid grid-cols-1 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#bd5b4c] transition-colors">
                     <div className="relative w-full h-auto ">
                       <input
                         type="file"
