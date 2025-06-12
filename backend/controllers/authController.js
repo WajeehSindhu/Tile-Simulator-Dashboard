@@ -39,12 +39,12 @@ exports.forgotPassword = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
-    const frontendBaseURL = 'https://tile-simulator-dashboard.onrender.com';
+    const frontendBaseURL = 'https://tile-simulator-dashboard.vercel.app';
     const resetLink = `${frontendBaseURL}/reset-password/${token}`;
 
     const html = `
      <div style="margin: 20px 10px;">
-    <img src="https://tile-simulator-dashboard.onrender.com/Images/logo.png" alt="Sight Logo" style="max-width: 100px; margin-bottom: 5px;" />
+    <img src="https://tile-simulator-dashboard.vercel.app/Images/logo.png" alt="Sight Logo" style="max-width: 100px; margin-bottom: 5px;" />
     <h3>Password Reset</h3>
     <p>Hello ${user.userName},</p>
     <p>You requested a password reset. Click the button below to set a new password:</p>
