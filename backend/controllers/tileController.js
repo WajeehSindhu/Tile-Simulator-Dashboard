@@ -164,6 +164,40 @@ exports.getTileById = async (req, res) => {
   }
 };
 
+exports.getTilesWithColorsUsed = async (req, res) => {
+  try {
+    const tiles = await Tile.find()
+      .populate('backgroundColor') // for main mask
+      .populate('subMasks.backgroundColor'); // for sub masks
+
+    const tilesWithColors = tiles.map(tile => {
+      const colorsUsedSet = new Set();
+
+      // Add mainMask backgroundColor
+      if (tile.backgroundColor?.hex) {
+        colorsUsedSet.add(tile.backgroundColor.hex);
+      }
+
+      // Add each subMask's backgroundColor
+      tile.subMasks.forEach(mask => {
+        if (mask.backgroundColor?.hex) {
+          colorsUsedSet.add(mask.backgroundColor.hex);
+        }
+      });
+
+      return {
+        ...tile.toObject(),
+        colorsUsed: Array.from(colorsUsedSet)
+      };
+    });
+
+    res.status(200).json(tilesWithColors);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch tiles" });
+  }
+};
+
 exports.updateTile = async (req, res) => {
   try {
     const {

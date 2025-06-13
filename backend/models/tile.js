@@ -57,7 +57,12 @@ const tileSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  colorsUsed: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Color'
+}],
+
 });
 
 // Add middleware to clean up Cloudinary images before deletion
