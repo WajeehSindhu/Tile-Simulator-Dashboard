@@ -100,6 +100,7 @@ exports.createTile = async (req, res) => {
       shapeStyle,
       scale: parseFloat(scale),
       subMasks,
+      colorsUsed: [backgroundColor, ...tileMaskColors]
     });
 
     await tile.save();
@@ -107,7 +108,8 @@ exports.createTile = async (req, res) => {
     const savedTile = await Tile.findById(tile._id)
       .populate("backgroundColor", "hexCode")
       .populate("category", "name")
-      .populate("subMasks.backgroundColor", "hexCode");
+      .populate("subMasks.backgroundColor", "hexCode")
+      .populate("colorsUsed", "hexCode");
 
     res.status(201).json(savedTile);
   } catch (error) {
@@ -225,8 +227,21 @@ exports.updateTile = async (req, res) => {
       scale: scale !== undefined ? parseFloat(scale) : tile.scale,
       mainMask: tile.mainMask,
       mainMaskPublicId: tile.mainMaskPublicId,
-      subMasks: tile.subMasks
+      subMasks: tile.subMasks,
+      colorsUsed: [backgroundColor || tile.backgroundColor] // Initialize with main color
     };
+
+    // If there are sub mask colors, add them to colorsUsed
+    if (req.body.tileMaskColors) {
+      const tileMaskColors = Array.isArray(req.body.tileMaskColors)
+        ? req.body.tileMaskColors
+        : [req.body.tileMaskColors];
+      updateData.colorsUsed = [...updateData.colorsUsed, ...tileMaskColors];
+    } else if (tile.subMasks) {
+      // If no new colors provided, use existing sub mask colors
+      const existingSubMaskColors = tile.subMasks.map(mask => mask.backgroundColor);
+      updateData.colorsUsed = [...updateData.colorsUsed, ...existingSubMaskColors];
+    }
 
     // Validate category if provided
     if (category) {
@@ -331,7 +346,8 @@ exports.updateTile = async (req, res) => {
       }
     ).populate("backgroundColor", "hexCode")
      .populate("category", "name")
-     .populate("subMasks.backgroundColor", "hexCode");
+     .populate("subMasks.backgroundColor", "hexCode")
+     .populate("colorsUsed", "hexCode");
 
     if (!updatedTile) {
       return res.status(404).json({ error: "Tile not found after update" });

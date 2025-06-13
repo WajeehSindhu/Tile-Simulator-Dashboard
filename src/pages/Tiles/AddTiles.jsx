@@ -194,8 +194,8 @@ const AddTiles = () => {
               shapeStyle: tileToEdit.shapeStyle || "Square",
               scale: tileToEdit.scale || "1",
               mainMask: null,
-              tileMasks: [],
-              tileMaskColors: tileToEdit.tileMaskColors || [],
+              tileMasks: tileToEdit.subMasks?.map(mask => mask.image) || [],
+              tileMaskColors: tileToEdit.subMasks?.map(mask => mask.backgroundColor) || [],
             };
 
             setFormData(newFormData);
@@ -218,9 +218,7 @@ const AddTiles = () => {
 
             const newColorHexCodes = {
               main: getColorHexCode(tileToEdit.backgroundColor),
-              masks: tileToEdit.tileMaskColors.map((colorId) =>
-                getColorHexCode(colorId)
-              ),
+              masks: tileToEdit.subMasks?.map(mask => getColorHexCode(mask.backgroundColor)) || [],
             };
             setSelectedColorHexCodes(newColorHexCodes);
             localStorage.setItem('editTileColorHexCodes', JSON.stringify(newColorHexCodes));
