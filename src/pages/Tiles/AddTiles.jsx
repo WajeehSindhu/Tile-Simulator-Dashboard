@@ -416,23 +416,20 @@ const AddTiles = () => {
       const newFile = files[0];
       const dataUrl = await readFileAsDataURL(newFile);
 
-      // Set a default color if available (first color in the list)
-      const defaultColor = tileColors.length > 0 ? tileColors[0] : null;
-
-      // Update form data with new mask and default color
+      // Update form data with new mask
       setFormData((prev) => ({
         ...prev,
         tileMasks: [...prev.tileMasks, newFile],
-        tileMaskColors: [...prev.tileMaskColors, defaultColor?._id || ""],
+        tileMaskColors: [...prev.tileMaskColors, ""],
       }));
 
       // Update previews
       setTileMaskPreviews((prev) => [...prev, dataUrl]);
 
-      // Update color hex codes
+      // Update color hex codes - initialize with empty string for new mask
       setSelectedColorHexCodes((prev) => ({
         ...prev,
-        masks: [...prev.masks, defaultColor?.hexCode || ""],
+        masks: [...prev.masks, ""],
       }));
 
       // Automatically open color picker for the new mask
