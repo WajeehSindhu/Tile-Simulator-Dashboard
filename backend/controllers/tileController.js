@@ -328,10 +328,16 @@ exports.updateTile = async (req, res) => {
         }));
       } else if (tileMaskColors.length > 0) {
         // If only colors are being updated (no new files)
-        updateData.subMasks = tile.subMasks.map((mask, index) => ({
-          ...mask.toObject(),
-          backgroundColor: tileMaskColors[index] || mask.backgroundColor
-        }));
+        // Preserve existing submasks and update their colors
+        updateData.subMasks = tile.subMasks.map((mask, index) => {
+          // If we have a new color for this index, use it, otherwise keep the existing color
+          const newColor = tileMaskColors[index] || mask.backgroundColor;
+          return {
+            image: mask.image,
+            publicId: mask.publicId,
+            backgroundColor: newColor
+          };
+        });
       }
     }
 
