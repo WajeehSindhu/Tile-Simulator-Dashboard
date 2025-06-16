@@ -416,9 +416,6 @@ const AddTiles = () => {
       const newFile = files[0];
       const dataUrl = await readFileAsDataURL(newFile);
 
-      // Get the current length before updating state
-      const currentLength = formData.tileMasks.length;
-
       // Update form data with new mask
       setFormData((prev) => ({
         ...prev,
@@ -435,8 +432,9 @@ const AddTiles = () => {
         masks: [...prev.masks, ""],
       }));
 
-      // Set current color target and open color picker
-      setCurrentColorTarget(currentLength);
+      // Set current color target and show color picker
+      const newIndex = formData.tileMasks.length;
+      setCurrentColorTarget(newIndex);
       setShowColorPicker(true);
     }
   };
@@ -467,6 +465,17 @@ const AddTiles = () => {
       }));
     }
   }, [formData.backgroundColor, formData.tileMaskColors, tileColors]);
+
+  // Add useEffect to handle color updates
+  useEffect(() => {
+    // When a new mask is added (and it doesn't have a color yet)
+    if (formData.tileMasks.length > 0 && 
+        formData.tileMasks.length > formData.tileMaskColors.filter(Boolean).length) {
+      const newIndex = formData.tileMasks.length - 1;
+      setCurrentColorTarget(newIndex);
+      setShowColorPicker(true);
+    }
+  }, [formData.tileMasks.length, formData.tileMaskColors]);
 
   const removeTileMask = (index) => {
     setFormData((prev) => {
