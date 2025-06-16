@@ -188,16 +188,22 @@ const AddTiles = () => {
         if (isEditing && tiles) {
           const tileToEdit = tiles.find((t) => t._id === id);
           if (tileToEdit) {
+            // Ensure we have the color data
+            if (!tileToEdit.backgroundColor || !tileToEdit.subMasks) {
+              console.error("Missing color data in tile:", tileToEdit);
+              return;
+            }
+
             const newFormData = {
               tileName: tileToEdit.tileName || "",
               category: tileToEdit.category?._id || "",
-              backgroundColor: tileToEdit.backgroundColor || "",
+              backgroundColor: tileToEdit.backgroundColor?._id || tileToEdit.backgroundColor || "",
               groutShape: tileToEdit.groutShape || "Square",
               shapeStyle: tileToEdit.shapeStyle || "Square",
               scale: tileToEdit.scale || "1",
               mainMask: null,
               tileMasks: tileToEdit.subMasks?.map(mask => mask.image) || [],
-              tileMaskColors: tileToEdit.subMasks?.map(mask => mask.backgroundColor) || [],
+              tileMaskColors: tileToEdit.subMasks?.map(mask => mask.backgroundColor?._id || mask.backgroundColor) || [],
             };
 
             setFormData(newFormData);
@@ -213,14 +219,18 @@ const AddTiles = () => {
 
             // Set color hex codes - ensure tileColors is loaded
             if (tileColors && tileColors.length > 0) {
-              const mainColor = tileColors.find(c => c._id === tileToEdit.backgroundColor);
-              const maskColors = tileToEdit.subMasks?.map(mask => {
-                const color = tileColors.find(c => c._id === mask.backgroundColor);
-                return color?.hexCode || "";
-              }) || [];
+              // Get main color hex code
+              const mainColor = tileToEdit.backgroundColor?.hexCode || 
+                              tileColors.find(c => c._id === tileToEdit.backgroundColor)?.hexCode || "";
+
+              // Get mask color hex codes
+              const maskColors = tileToEdit.subMasks?.map(mask => 
+                mask.backgroundColor?.hexCode || 
+                tileColors.find(c => c._id === mask.backgroundColor)?.hexCode || ""
+              ) || [];
 
               setSelectedColorHexCodes({
-                main: mainColor?.hexCode || "",
+                main: mainColor,
                 masks: maskColors
               });
             }
