@@ -313,19 +313,16 @@ exports.updateTile = async (req, res) => {
           }
         }
 
-        // Delete old submasks from Cloudinary
-        for (const mask of tile.subMasks) {
-          if (mask.publicId) {
-            await deleteFromCloudinary(mask.publicId);
-          }
-        }
-
-        // Create new submasks array
-        updateData.subMasks = tileMasks.map((mask, index) => ({
+        // Create new submasks array by combining existing and new submasks
+        const existingSubMasks = tile.subMasks || [];
+        const newSubMasks = tileMasks.map((mask, index) => ({
           image: mask.path,
           publicId: mask.filename,
           backgroundColor: tileMaskColors[index]
         }));
+
+        // Combine existing and new submasks
+        updateData.subMasks = [...existingSubMasks, ...newSubMasks];
       } else if (tileMaskColors.length > 0) {
         // If only colors are being updated (no new files)
         // Preserve existing submasks and update their colors
