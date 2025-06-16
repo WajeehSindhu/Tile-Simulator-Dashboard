@@ -131,6 +131,7 @@ const AddTiles = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [currentColorTarget, setCurrentColorTarget] = useState(null);
   const [selectedColorHexCodes, setSelectedColorHexCodes] = useState(getInitialColorHexCodes());
+  const [deletedSubMasks, setDeletedSubMasks] = useState([]);
 
   // Save form data while working
   useEffect(() => {
@@ -299,6 +300,13 @@ const AddTiles = () => {
         });
       }
 
+      // Append deleted submask IDs if any
+      if (isEditing && deletedSubMasks.length > 0) {
+        deletedSubMasks.forEach(id => {
+          data.append("deletedSubMasks", id);
+        });
+      }
+
       if (isEditing) {
         const response = await updateTile(id, data);
         if (response?.error) {
@@ -436,6 +444,14 @@ const AddTiles = () => {
       }));
       return newFormData;
     });
+
+    // If we're in edit mode and the mask is an existing one (has a URL), add its ID to deletedSubMasks
+    if (isEditing && typeof formData.tileMasks[index] === 'string') {
+      const tileToEdit = tiles.find((t) => t._id === id);
+      if (tileToEdit && tileToEdit.subMasks[index]) {
+        setDeletedSubMasks(prev => [...prev, tileToEdit.subMasks[index]._id]);
+      }
+    }
 
     setTileMaskPreviews((prev) => {
       const newPreviews = prev.filter((_, idx) => idx !== index);

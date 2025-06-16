@@ -9,7 +9,8 @@ const {
   deleteTile,
   getGroutShapes,
   getShapeStyles,
-  getScaleRange
+  getScaleRange,
+  getTilesWithColorsUsed
 } = require("../controllers/tileController");
 
 // Get available grout shapes
@@ -20,6 +21,9 @@ router.get("/shape-styles", getShapeStyles);
 
 // Get scale range configuration
 router.get("/scale-range", getScaleRange);
+
+// Get tiles with colors used
+router.get("/with-colors", getTilesWithColorsUsed);
 
 // Create a new tile
 router.post(
