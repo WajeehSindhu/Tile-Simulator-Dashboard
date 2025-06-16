@@ -281,11 +281,18 @@ const AddTiles = () => {
       if (formData.tileMasks && formData.tileMasks.length > 0) {
         formData.tileMasks.forEach((file, index) => {
           if (file instanceof File) {
+            // Handle new submask files
             data.append("tileMasks", file);
             if (!formData.tileMaskColors[index]) {
               throw new Error("Please select a color for all tile masks.");
             }
-            // Make sure we're sending the ID string for tile mask colors as well
+            const colorId = typeof formData.tileMaskColors[index] === 'object' ? formData.tileMaskColors[index]._id : formData.tileMaskColors[index];
+            data.append("tileMaskColors", colorId);
+          } else if (isEditing && typeof file === 'string') {
+            // Handle existing submask URLs during edit
+            if (!formData.tileMaskColors[index]) {
+              throw new Error("Please select a color for all tile masks.");
+            }
             const colorId = typeof formData.tileMaskColors[index] === 'object' ? formData.tileMaskColors[index]._id : formData.tileMaskColors[index];
             data.append("tileMaskColors", colorId);
           }
