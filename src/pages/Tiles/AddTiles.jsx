@@ -216,12 +216,15 @@ const AddTiles = () => {
               );
             }
 
-            const newColorHexCodes = {
-              main: getColorHexCode(tileToEdit.backgroundColor),
-              masks: tileToEdit.subMasks?.map(mask => getColorHexCode(mask.backgroundColor)) || [],
-            };
-            setSelectedColorHexCodes(newColorHexCodes);
-            localStorage.setItem('editTileColorHexCodes', JSON.stringify(newColorHexCodes));
+            // Wait for tileColors to be populated
+            if (tileColors && tileColors.length > 0) {
+              const newColorHexCodes = {
+                main: getColorHexCode(tileToEdit.backgroundColor),
+                masks: tileToEdit.subMasks?.map(mask => getColorHexCode(mask.backgroundColor)) || [],
+              };
+              setSelectedColorHexCodes(newColorHexCodes);
+              localStorage.setItem('editTileColorHexCodes', JSON.stringify(newColorHexCodes));
+            }
           }
         }
       } catch (error) {
@@ -236,7 +239,7 @@ const AddTiles = () => {
     return () => {
       isMounted = false;
     };
-  }, [id, isEditing]);
+  }, [id, isEditing, tileColors]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
