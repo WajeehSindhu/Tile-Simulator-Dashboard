@@ -11,6 +11,7 @@ const TileColors = () => {
     updateTileColor,
     colorLoading,
     colorError,
+    setTileColors,
   } = useAuth();
 
   const [newColor, setNewColor] = useState("#000000");
@@ -26,9 +27,14 @@ const TileColors = () => {
   const handleAddColor = async (e) => {
     e.preventDefault();
     try {
-      await addTileColor(newColor);
+      const response = await addTileColor(newColor);
       setNewColor("#000000");
-    } catch (err) {}
+      // Optimistically update the UI
+      setTileColors(prev => [...prev, response]);
+    } catch (err) {
+      // Revert optimistic update on error
+      setTileColors(prev => prev.filter(color => color._id !== response._id));
+    }
   };
 
   const handleEditClick = (color) => {
@@ -41,22 +47,41 @@ const TileColors = () => {
   const handleUpdateColor = async (e) => {
     e.preventDefault();
     try {
-      await updateTileColor(editingColor.id, editingColor.hexCode);
+      const response = await updateTileColor(editingColor.id, editingColor.hexCode);
+      // Optimistically update the UI
+      setTileColors(prev =>
+        prev.map(color => (color._id === editingColor.id ? response : color))
+      );
       setEditingColor(null);
-    } catch (err) {}
+    } catch (err) {
+      // Revert optimistic update on error
+      setTileColors(prev =>
+        prev.map(color => (color._id === editingColor.id ? { ...color } : color))
+      );
+    }
   };
 
   const handleDeleteColor = async (id) => {
     if (window.confirm("Are you sure you want to delete this color?")) {
       try {
+        // Optimistically remove from UI
+        const deletedColor = tileColors.find(color => color._id === id);
+        setTileColors(prev => prev.filter(color => color._id !== id));
+        
         await deleteTileColor(id);
+        
         // Adjust current page if needed
         const remainingItems = tileColors.length - 1;
         const totalPagesAfterDelete = Math.ceil(remainingItems / itemsPerPage);
         if (currentPage > totalPagesAfterDelete) {
           setCurrentPage(totalPagesAfterDelete);
         }
-      } catch (err) {}
+      } catch (err) {
+        // Revert optimistic update on error
+        if (deletedColor) {
+          setTileColors(prev => [...prev, deletedColor]);
+        }
+      }
     }
   };
 

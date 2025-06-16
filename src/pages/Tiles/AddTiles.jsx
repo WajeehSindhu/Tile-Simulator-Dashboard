@@ -133,39 +133,54 @@ const AddTiles = () => {
   const [selectedColorHexCodes, setSelectedColorHexCodes] = useState(getInitialColorHexCodes());
   const [deletedSubMasks, setDeletedSubMasks] = useState([]);
 
-  // Save form data while working
+  // Save form data while working - debounced to reduce frequent updates
   useEffect(() => {
-    if (formData.tileName) {
-      if (isEditing) {
-        localStorage.setItem('editTileFormData', JSON.stringify(formData));
-      } else {
-        localStorage.setItem('addTileFormData', JSON.stringify(formData));
+    const saveFormData = () => {
+      if (formData.tileName) {
+        if (isEditing) {
+          localStorage.setItem('editTileFormData', JSON.stringify(formData));
+        } else {
+          localStorage.setItem('addTileFormData', JSON.stringify(formData));
+        }
       }
-    }
+    };
+
+    const timeoutId = setTimeout(saveFormData, 500); // Debounce for 500ms
+    return () => clearTimeout(timeoutId);
   }, [formData, isEditing]);
 
-  // Save previews when they change
+  // Save previews when they change - debounced
   useEffect(() => {
-    if (isEditing) {
-      localStorage.setItem('editTilePreviews', JSON.stringify({
-        main: mainMaskPreview,
-        masks: tileMaskPreviews
-      }));
-    } else {
-      localStorage.setItem('addTilePreviews', JSON.stringify({
-        main: mainMaskPreview,
-        masks: tileMaskPreviews
-      }));
-    }
+    const savePreviews = () => {
+      if (isEditing) {
+        localStorage.setItem('editTilePreviews', JSON.stringify({
+          main: mainMaskPreview,
+          masks: tileMaskPreviews
+        }));
+      } else {
+        localStorage.setItem('addTilePreviews', JSON.stringify({
+          main: mainMaskPreview,
+          masks: tileMaskPreviews
+        }));
+      }
+    };
+
+    const timeoutId = setTimeout(savePreviews, 500); // Debounce for 500ms
+    return () => clearTimeout(timeoutId);
   }, [mainMaskPreview, tileMaskPreviews, isEditing]);
 
-  // Save color hex codes when they change
+  // Save color hex codes when they change - debounced
   useEffect(() => {
-    if (isEditing) {
-      localStorage.setItem('editTileColorHexCodes', JSON.stringify(selectedColorHexCodes));
-    } else {
-      localStorage.setItem('addTileColorHexCodes', JSON.stringify(selectedColorHexCodes));
-    }
+    const saveColorHexCodes = () => {
+      if (isEditing) {
+        localStorage.setItem('editTileColorHexCodes', JSON.stringify(selectedColorHexCodes));
+      } else {
+        localStorage.setItem('addTileColorHexCodes', JSON.stringify(selectedColorHexCodes));
+      }
+    };
+
+    const timeoutId = setTimeout(saveColorHexCodes, 500); // Debounce for 500ms
+    return () => clearTimeout(timeoutId);
   }, [selectedColorHexCodes, isEditing]);
 
   // Load existing tile data if editing

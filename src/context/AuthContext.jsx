@@ -241,11 +241,14 @@ export const AuthProvider = ({ children }) => {
     setColorError(null);
     try {
       const response = await api.post("/api/colors/add", { hexCode });
-      setTileColors((prev) => [...prev, response.data]);
+      // Optimistically update the state
+      setTileColors(prev => [...prev, response.data]);
       return response.data;
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to add color";
       setColorError(errMsg);
+      // Revert optimistic update on error
+      setTileColors(prev => prev.filter(color => color._id !== response.data._id));
       throw new Error(errMsg);
     } finally {
       setColorLoading(false);
@@ -256,11 +259,41 @@ export const AuthProvider = ({ children }) => {
     setColorLoading(true);
     setColorError(null);
     try {
+      // Optimistically remove from state
+      const deletedColor = tileColors.find(color => color._id === id);
+      setTileColors(prev => prev.filter(color => color._id !== id));
+      
       await api.delete(`/api/colors/${id}`);
-      setTileColors((prev) => prev.filter((color) => color._id !== id));
     } catch (error) {
       const errMsg = error.response?.data?.error || "Failed to delete color";
       setColorError(errMsg);
+      // Revert optimistic update on error
+      if (deletedColor) {
+        setTileColors(prev => [...prev, deletedColor]);
+      }
+      throw new Error(errMsg);
+    } finally {
+      setColorLoading(false);
+    }
+  };
+
+  const updateTileColor = async (id, hexCode) => {
+    setColorLoading(true);
+    setColorError(null);
+    try {
+      const response = await api.put(`/api/colors/${id}`, { hexCode });
+      // Optimistically update the state
+      setTileColors(prev =>
+        prev.map(color => (color._id === id ? response.data : color))
+      );
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.error || "Failed to update color";
+      setColorError(errMsg);
+      // Revert optimistic update on error
+      setTileColors(prev =>
+        prev.map(color => (color._id === id ? { ...color } : color))
+      );
       throw new Error(errMsg);
     } finally {
       setColorLoading(false);
@@ -327,24 +360,6 @@ export const AuthProvider = ({ children }) => {
       throw new Error(errMsg);
     } finally {
       setCategoryLoading(false);
-    }
-  };
-
-  const updateTileColor = async (id, hexCode) => {
-    setColorLoading(true);
-    setColorError(null);
-    try {
-      const response = await api.put(`/api/colors/${id}`, { hexCode });
-      setTileColors((prev) =>
-        prev.map((color) => (color._id === id ? response.data : color))
-      );
-      return response.data;
-    } catch (error) {
-      const errMsg = error.response?.data?.error || "Failed to update color";
-      setColorError(errMsg);
-      throw new Error(errMsg);
-    } finally {
-      setColorLoading(false);
     }
   };
 
