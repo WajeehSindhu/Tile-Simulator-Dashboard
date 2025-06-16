@@ -363,6 +363,7 @@ const AddTiles = () => {
 
   const handleColorSelect = (color) => {
     if (currentColorTarget === "main") {
+      // Update main mask color
       setFormData((prev) => ({
         ...prev,
         backgroundColor: color._id,
@@ -372,7 +373,7 @@ const AddTiles = () => {
         main: color.hexCode,
       }));
     } else if (typeof currentColorTarget === "number") {
-      // Update form data with the color ID
+      // Update submask color
       setFormData((prev) => {
         const newTileMaskColors = [...prev.tileMaskColors];
         newTileMaskColors[currentColorTarget] = color._id;
@@ -382,7 +383,6 @@ const AddTiles = () => {
         };
       });
 
-      // Update selected color hex codes
       setSelectedColorHexCodes((prev) => {
         const newMasks = [...prev.masks];
         newMasks[currentColorTarget] = color.hexCode;
@@ -416,6 +416,9 @@ const AddTiles = () => {
       const newFile = files[0];
       const dataUrl = await readFileAsDataURL(newFile);
 
+      // Get the current length before updating state
+      const currentLength = formData.tileMasks.length;
+
       // Update form data with new mask
       setFormData((prev) => ({
         ...prev,
@@ -426,18 +429,44 @@ const AddTiles = () => {
       // Update previews
       setTileMaskPreviews((prev) => [...prev, dataUrl]);
 
-      // Update color hex codes - initialize with empty string for new mask
+      // Update color hex codes
       setSelectedColorHexCodes((prev) => ({
         ...prev,
         masks: [...prev.masks, ""],
       }));
 
-      // Automatically open color picker for the new mask
-      const newMaskIndex = formData.tileMasks.length;
-      setCurrentColorTarget(newMaskIndex);
+      // Set current color target and open color picker
+      setCurrentColorTarget(currentLength);
       setShowColorPicker(true);
     }
   };
+
+  // Add useEffect to handle color updates
+  useEffect(() => {
+    if (tileColors && tileColors.length > 0) {
+      // Update main mask color hex code
+      if (formData.backgroundColor) {
+        const mainColor = tileColors.find(c => c._id === formData.backgroundColor);
+        if (mainColor) {
+          setSelectedColorHexCodes(prev => ({
+            ...prev,
+            main: mainColor.hexCode
+          }));
+        }
+      }
+
+      // Update submask color hex codes
+      const updatedMasks = formData.tileMaskColors.map(colorId => {
+        const color = tileColors.find(c => c._id === colorId);
+        return color ? color.hexCode : "";
+      });
+
+      setSelectedColorHexCodes(prev => ({
+        ...prev,
+        masks: updatedMasks
+      }));
+    }
+  }, [formData.backgroundColor, formData.tileMaskColors, tileColors]);
 
   const removeTileMask = (index) => {
     setFormData((prev) => {
