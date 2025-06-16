@@ -883,8 +883,8 @@ const AddTiles = () => {
                           onClick={() => handleColorSelect(color)}
                           className={`w-12 h-12 rounded-lg border-2 hover:scale-110 transition-transform ${
                             (currentColorTarget === "main"
-                              ? formData.backgroundColor
-                              : formData.tileMaskColors[currentColorTarget]) ===
+                              ? formData.backgroundColor === color._id
+                              : formData.tileMaskColors[currentColorTarget]) === 
                             color._id
                               ? "border-[#bd5b4c]"
                               : "border-gray-200"
