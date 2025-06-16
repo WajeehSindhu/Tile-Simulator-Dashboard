@@ -286,20 +286,21 @@ exports.updateTile = async (req, res) => {
 
       // If new masks are uploaded
       if (tileMasks.length > 0) {
-        // Validate matching number of masks and colors
-        if (tileMasks.length !== tileMaskColors.length) {
+        // For new uploads, validate that each mask has a corresponding color
+        if (tileMaskColors.length < tileMasks.length) {
           // Clean up any newly uploaded files
           for (const mask of tileMasks) {
             await deleteFromCloudinary(mask.filename);
           }
           return res.status(400).json({
             error: "Mismatched masks and colors",
-            details: `Number of tile masks (${tileMasks.length}) does not match number of colors (${tileMaskColors.length})`
+            details: `Each new mask must have a corresponding color. Found ${tileMasks.length} new masks but only ${tileMaskColors.length} colors.`
           });
         }
 
-        // Validate color IDs
-        for (const colorId of tileMaskColors) {
+        // Validate color IDs for new masks
+        for (let i = 0; i < tileMasks.length; i++) {
+          const colorId = tileMaskColors[i];
           const exists = await Color.findById(colorId);
           if (!exists) {
             // Clean up any newly uploaded files
