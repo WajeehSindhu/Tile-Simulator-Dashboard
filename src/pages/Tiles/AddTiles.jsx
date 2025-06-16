@@ -420,25 +420,18 @@ const AddTiles = () => {
       });
 
       // Update previews
-      setTileMaskPreviews((prev) => {
-        const newPreviews = [...prev, dataUrl];
-        // Save updated previews to localStorage
-        localStorage.setItem('tilePreviews', JSON.stringify({
-          main: mainMaskPreview,
-          masks: newPreviews
-        }));
-        return newPreviews;
-      });
+      setTileMaskPreviews((prev) => [...prev, dataUrl]);
 
-      setSelectedColorHexCodes((prev) => {
-        const newColorHexCodes = {
-          ...prev,
-          masks: [...prev.masks, ""],
-        };
-        // Save updated color hex codes to localStorage
-        localStorage.setItem('tileColorHexCodes', JSON.stringify(newColorHexCodes));
-        return newColorHexCodes;
-      });
+      // Update color hex codes - initialize with empty string for new mask
+      setSelectedColorHexCodes((prev) => ({
+        ...prev,
+        masks: [...prev.masks, ""]
+      }));
+
+      // Automatically open color picker for the new mask
+      const newMaskIndex = formData.tileMasks.length;
+      setCurrentColorTarget(newMaskIndex);
+      setShowColorPicker(true);
     }
   };
 
