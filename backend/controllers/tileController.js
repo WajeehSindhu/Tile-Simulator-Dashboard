@@ -276,13 +276,30 @@ exports.updateTile = async (req, res) => {
     }
 
     // Handle submasks update if new files or colors are provided
-    if (req.files?.tileMasks || req.body.tileMaskColors) {
+    if (req.files?.tileMasks || req.body.tileMaskColors || req.body.deletedSubMasks) {
       const tileMasks = req.files?.tileMasks || [];
       const tileMaskColors = Array.isArray(req.body.tileMaskColors)
         ? req.body.tileMaskColors
         : req.body.tileMaskColors
         ? [req.body.tileMaskColors]
         : [];
+      
+      // Handle deleted submasks
+      const deletedSubMasks = Array.isArray(req.body.deletedSubMasks)
+        ? req.body.deletedSubMasks
+        : req.body.deletedSubMasks
+        ? [req.body.deletedSubMasks]
+        : [];
+
+      // Delete removed submasks from Cloudinary
+      if (deletedSubMasks.length > 0) {
+        for (const maskId of deletedSubMasks) {
+          const maskToDelete = tile.subMasks.find(mask => mask._id.toString() === maskId);
+          if (maskToDelete && maskToDelete.publicId) {
+            await deleteFromCloudinary(maskToDelete.publicId);
+          }
+        }
+      }
 
       // If new masks are uploaded
       if (tileMasks.length > 0) {
@@ -315,7 +332,9 @@ exports.updateTile = async (req, res) => {
         }
 
         // Create new submasks array by combining existing and new submasks
-        const existingSubMasks = tile.subMasks || [];
+        const existingSubMasks = (tile.subMasks || []).filter(mask => 
+          !deletedSubMasks.includes(mask._id.toString())
+        );
         const newSubMasks = tileMasks.map((mask, index) => ({
           image: mask.path,
           publicId: mask.filename,
@@ -324,18 +343,20 @@ exports.updateTile = async (req, res) => {
 
         // Combine existing and new submasks
         updateData.subMasks = [...existingSubMasks, ...newSubMasks];
-      } else if (tileMaskColors.length > 0) {
-        // If only colors are being updated (no new files)
-        // Preserve existing submasks and update their colors
-        updateData.subMasks = tile.subMasks.map((mask, index) => {
-          // If we have a new color for this index, use it, otherwise keep the existing color
-          const newColor = tileMaskColors[index] || mask.backgroundColor;
-          return {
-            image: mask.image,
-            publicId: mask.publicId,
-            backgroundColor: newColor
-          };
-        });
+      } else if (tileMaskColors.length > 0 || deletedSubMasks.length > 0) {
+        // If only colors are being updated or masks are being deleted (no new files)
+        // Filter out deleted masks and update colors for remaining ones
+        updateData.subMasks = (tile.subMasks || [])
+          .filter(mask => !deletedSubMasks.includes(mask._id.toString()))
+          .map((mask, index) => {
+            // If we have a new color for this index, use it, otherwise keep the existing color
+            const newColor = tileMaskColors[index] || mask.backgroundColor;
+            return {
+              image: mask.image,
+              publicId: mask.publicId,
+              backgroundColor: newColor
+            };
+          });
       }
     }
 
