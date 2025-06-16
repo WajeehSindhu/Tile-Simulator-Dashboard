@@ -335,10 +335,15 @@ exports.updateTile = async (req, res) => {
         const existingSubMasks = (tile.subMasks || []).filter(mask => 
           !deletedSubMasks.includes(mask._id.toString())
         );
+
+        // Get the colors for existing masks
+        const existingMaskColors = existingSubMasks.map(mask => mask.backgroundColor);
+
+        // Create new submasks with their corresponding colors
         const newSubMasks = tileMasks.map((mask, index) => ({
           image: mask.path,
           publicId: mask.filename,
-          backgroundColor: tileMaskColors[index]
+          backgroundColor: tileMaskColors[tileMaskColors.length - tileMasks.length + index] // Get colors for new masks from the end of the array
         }));
 
         // Combine existing and new submasks

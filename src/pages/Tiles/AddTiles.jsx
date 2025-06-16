@@ -247,6 +247,13 @@ const AddTiles = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if all submasks have colors
+    const hasUncoloredSubmasks = formData.tileMaskColors.some(color => !color);
+    if (hasUncoloredSubmasks) {
+      alert("Please select colors for all submasks before submitting.");
+      return;
+    }
+
     try {
       const data = new FormData();
       
@@ -413,7 +420,7 @@ const AddTiles = () => {
       setFormData((prev) => ({
         ...prev,
         tileMasks: [...prev.tileMasks, newFile],
-        tileMaskColors: [...prev.tileMaskColors, ""],
+        tileMaskColors: [...prev.tileMaskColors, ""], // Initialize with empty string
       }));
 
       // Update previews
