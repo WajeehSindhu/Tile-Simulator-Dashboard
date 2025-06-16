@@ -174,6 +174,7 @@ const AddTiles = () => {
 
     const fetchData = async () => {
       try {
+        // First load all necessary data
         await Promise.all([
           fetchTileColors(),
           fetchTileCategories(),
@@ -183,8 +184,8 @@ const AddTiles = () => {
           fetchScaleRange()
         ]);
 
-        // Only populate form if editing an existing tile
-        if (isEditing && tiles && isMounted) {
+        // Only then proceed with setting form data if editing
+        if (isEditing && tiles) {
           const tileToEdit = tiles.find((t) => t._id === id);
           if (tileToEdit) {
             const newFormData = {
@@ -200,29 +201,29 @@ const AddTiles = () => {
             };
 
             setFormData(newFormData);
-            // Save to edit-specific localStorage
-            localStorage.setItem('editTileFormData', JSON.stringify(newFormData));
 
+            // Set previews
             if (tileToEdit.mainMask) {
               setMainMaskPreview(tileToEdit.mainMask);
-              localStorage.setItem('editTilePreviews', JSON.stringify({
-                main: tileToEdit.mainMask,
-                masks: tileToEdit.subMasks?.map(mask => mask.image) || []
-              }));
             }
 
-            if (tileToEdit.subMasks && tileToEdit.subMasks.length > 0) {
-              setTileMaskPreviews(
-                tileToEdit.subMasks.map((mask) => mask.image)
-              );
+            if (tileToEdit.subMasks?.length > 0) {
+              setTileMaskPreviews(tileToEdit.subMasks.map(mask => mask.image));
             }
 
-            const newColorHexCodes = {
-              main: getColorHexCode(tileToEdit.backgroundColor),
-              masks: tileToEdit.subMasks?.map(mask => getColorHexCode(mask.backgroundColor)) || [],
-            };
-            setSelectedColorHexCodes(newColorHexCodes);
-            localStorage.setItem('editTileColorHexCodes', JSON.stringify(newColorHexCodes));
+            // Set color hex codes - ensure tileColors is loaded
+            if (tileColors && tileColors.length > 0) {
+              const mainColor = tileColors.find(c => c._id === tileToEdit.backgroundColor);
+              const maskColors = tileToEdit.subMasks?.map(mask => {
+                const color = tileColors.find(c => c._id === mask.backgroundColor);
+                return color?.hexCode || "";
+              }) || [];
+
+              setSelectedColorHexCodes({
+                main: mainColor?.hexCode || "",
+                masks: maskColors
+              });
+            }
           }
         }
       } catch (error) {
