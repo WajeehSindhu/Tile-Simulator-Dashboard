@@ -174,8 +174,11 @@ const AddTiles = () => {
 
     const fetchData = async () => {
       try {
+        // First fetch colors to ensure they're available
+        await fetchTileColors();
+        
+        // Then fetch other data
         await Promise.all([
-          fetchTileColors(),
           fetchTileCategories(),
           fetchTiles(),
           fetchGroutShapes(),
@@ -187,6 +190,12 @@ const AddTiles = () => {
         if (isEditing && tiles && isMounted) {
           const tileToEdit = tiles.find((t) => t._id === id);
           if (tileToEdit) {
+            // Get the color objects for main and sub masks
+            const mainColor = tileColors.find(c => c._id === tileToEdit.backgroundColor);
+            const subMaskColors = tileToEdit.subMasks?.map(mask => 
+              tileColors.find(c => c._id === mask.backgroundColor)
+            ) || [];
+
             const newFormData = {
               tileName: tileToEdit.tileName || "",
               category: tileToEdit.category?._id || "",
@@ -217,9 +226,10 @@ const AddTiles = () => {
               );
             }
 
+            // Set color hex codes using the found color objects
             const newColorHexCodes = {
-              main: getColorHexCode(tileToEdit.backgroundColor),
-              masks: tileToEdit.subMasks?.map(mask => getColorHexCode(mask.backgroundColor)) || [],
+              main: mainColor?.hexCode || "",
+              masks: subMaskColors.map(color => color?.hexCode || ""),
             };
             setSelectedColorHexCodes(newColorHexCodes);
             localStorage.setItem('editTileColorHexCodes', JSON.stringify(newColorHexCodes));
@@ -237,7 +247,7 @@ const AddTiles = () => {
     return () => {
       isMounted = false;
     };
-  }, [id, isEditing]);
+  }, [id, isEditing, tileColors]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
