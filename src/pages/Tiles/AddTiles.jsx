@@ -372,18 +372,25 @@ const AddTiles = () => {
         main: color.hexCode,
       }));
     } else if (typeof currentColorTarget === "number") {
-      setFormData((prev) => ({
-        ...prev,
-        tileMaskColors: prev.tileMaskColors.map((c, idx) =>
-          idx === currentColorTarget ? color._id : c
-        ),
-      }));
-      setSelectedColorHexCodes((prev) => ({
-        ...prev,
-        masks: prev.masks.map((hex, idx) =>
-          idx === currentColorTarget ? color.hexCode : hex
-        ),
-      }));
+      // Update form data with the color ID
+      setFormData((prev) => {
+        const newTileMaskColors = [...prev.tileMaskColors];
+        newTileMaskColors[currentColorTarget] = color._id;
+        return {
+          ...prev,
+          tileMaskColors: newTileMaskColors,
+        };
+      });
+
+      // Update selected color hex codes
+      setSelectedColorHexCodes((prev) => {
+        const newMasks = [...prev.masks];
+        newMasks[currentColorTarget] = color.hexCode;
+        return {
+          ...prev,
+          masks: newMasks,
+        };
+      });
     }
     setShowColorPicker(false);
   };
@@ -410,14 +417,11 @@ const AddTiles = () => {
       const dataUrl = await readFileAsDataURL(newFile);
 
       // Update form data with new mask
-      setFormData((prev) => {
-        const newFormData = {
-          ...prev,
-          tileMasks: [...prev.tileMasks, newFile],
-          tileMaskColors: [...prev.tileMaskColors, ""],
-        };
-        return newFormData;
-      });
+      setFormData((prev) => ({
+        ...prev,
+        tileMasks: [...prev.tileMasks, newFile],
+        tileMaskColors: [...prev.tileMaskColors, ""],
+      }));
 
       // Update previews
       setTileMaskPreviews((prev) => [...prev, dataUrl]);
@@ -425,7 +429,7 @@ const AddTiles = () => {
       // Update color hex codes - initialize with empty string for new mask
       setSelectedColorHexCodes((prev) => ({
         ...prev,
-        masks: [...prev.masks, ""]
+        masks: [...prev.masks, ""],
       }));
 
       // Automatically open color picker for the new mask
