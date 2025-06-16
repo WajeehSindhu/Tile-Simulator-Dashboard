@@ -217,23 +217,16 @@ const AddTiles = () => {
               setTileMaskPreviews(tileToEdit.subMasks.map(mask => mask.image));
             }
 
-            // Set color hex codes - ensure tileColors is loaded
-            if (tileColors && tileColors.length > 0) {
-              // Get main color hex code
-              const mainColor = tileToEdit.backgroundColor?.hexCode || 
-                              tileColors.find(c => c._id === tileToEdit.backgroundColor)?.hexCode || "";
+            // Set color hex codes - ensure we're using the populated color data
+            const mainColor = tileToEdit.backgroundColor?.hexCode || "";
+            const maskColors = tileToEdit.subMasks?.map(mask => 
+              mask.backgroundColor?.hexCode || ""
+            ) || [];
 
-              // Get mask color hex codes
-              const maskColors = tileToEdit.subMasks?.map(mask => 
-                mask.backgroundColor?.hexCode || 
-                tileColors.find(c => c._id === mask.backgroundColor)?.hexCode || ""
-              ) || [];
-
-              setSelectedColorHexCodes({
-                main: mainColor,
-                masks: maskColors
-              });
-            }
+            setSelectedColorHexCodes({
+              main: mainColor,
+              masks: maskColors
+            });
           }
         }
       } catch (error) {
