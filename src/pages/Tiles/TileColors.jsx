@@ -77,7 +77,6 @@ const TileColors = () => {
       </Helmet>
 
       <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left: Add/Edit Color Form */}
         <div className="md:col-span-1 bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold mb-4">
             {editingColor ? "Edit Color" : "Add New Color"}
@@ -134,8 +133,6 @@ const TileColors = () => {
             )}
           </form>
         </div>
-
-        {/* Right: List of Colors */}
         <div className="md:col-span-2 bg-white rounded-lg shadow">
           <h2 className="text-lg font-semibold p-6 border-b">
             All Tile Colors
@@ -178,8 +175,6 @@ const TileColors = () => {
                   </div>
                 ))}
               </div>
-
-              {/* ✅ Show pagination only if more than 5 colors */}
               {tileColors.length > itemsPerPage && (
                 <div className="flex justify-center items-center gap-2 mt-4 p-4">
                   <button
