@@ -129,7 +129,7 @@ const TileCategories = () => {
                 onChange={handleChange}
                 className="w-full mb-4 border border-gray-300 rounded p-2"
               />
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="submit"
                   className="bg-[#BD5B4C] text-white px-4 py-2 rounded text-sm"
@@ -151,13 +151,14 @@ const TileCategories = () => {
 
           {/* Table */}
           <div className="md:col-span-2">
+            <div className="overflow-x-auto custom-scrollbar">
             <table className="min-w-full bg-white border border-gray-300 rounded text-sm">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="p-4 border-b text-left">Name</th>
-                  <th className="p-4 border-b text-left">Description</th>
-                  <th className="p-4 border-b text-left">Tiles Count</th>
-                  <th className="p-4 border-b text-left">Actions</th>
+                  <th className="p-4 border-b text-left whitespace-nowrap">Name</th>
+                  <th className="p-4 border-b text-left whitespace-nowrap">Description</th>
+                  <th className="p-4 border-b text-left whitespace-nowrap">Tiles Count</th>
+                  <th className="p-4 border-b text-left whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="text-bold">
@@ -166,14 +167,14 @@ const TileCategories = () => {
                     key={item._id || i}
                     className="border-t group hover:bg-gray-50"
                   >
-                    <td className="p-4 text-gray-700 font-bold">{item.name}</td>
-                    <td className="p-4 text-gray-500">
+                    <td className="p-4 text-gray-700 font-bold whitespace-nowrap">{item.name}</td>
+                    <td className="p-4 text-gray-500 whitespace-nowrap">
                       {item.description || "—"}
                     </td>
-                    <td className="p-4 text-gray-500">
+                    <td className="p-4 text-gray-500 whitespace-nowrap">
                       {item.tileCount || 0} tiles
                     </td>
-                    <td className="p-2 space-x-2 text-xs">
+                    <td className="p-2 space-x-2 text-xs whitespace-nowrap">
                       <button
                         className="text-blue-600 hover:underline"
                         onClick={() => handleEdit(item)}
@@ -198,6 +199,8 @@ const TileCategories = () => {
                 )}
               </tbody>
             </table>
+
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (

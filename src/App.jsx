@@ -13,6 +13,7 @@ import TileColors from './pages/Tiles/TileColors';
 import Submissions from './pages/Tiles/Submissions';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Loader from './components/Loader';
+import './index.css'; 
 
 const DashboardLayout = ({ children }) => {
   return (

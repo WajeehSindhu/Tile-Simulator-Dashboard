@@ -146,7 +146,7 @@ const TileColors = () => {
             </div>
           ) : (
             <>
-              <div className="divide-y">
+              <div className="divide-y custom-scrollbar overflow-x-auto">
                 {currentColors.map((color) => (
                   <div
                     key={color._id}
@@ -157,11 +157,11 @@ const TileColors = () => {
                         className="w-16 h-16 rounded border shadow-sm"
                         style={{ backgroundColor: color.hexCode }}
                       />
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 whitespace-nowrap">
                         {color.hexCode}
                       </div>
                     </div>
-                    <div className="flex gap-2 text-xs">
+                    <div className="flex gap-2 text-xs whitespace-nowrap">
                       <button
                         onClick={() => handleEditClick(color)}
                         className="text-blue-600 hover:underline"

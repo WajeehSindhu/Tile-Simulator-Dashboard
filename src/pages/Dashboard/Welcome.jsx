@@ -37,19 +37,7 @@ const Welcome = () => {
             <p className="text-2xl text-[#bd5b4c]">0</p>
           </div>
         </div>
-
-        {/* Categories with Tile Counts */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Tiles by Category</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {tileCategories?.map((category) => (
-              <div key={category._id} className="bg-white p-4 rounded-lg shadow">
-                <h3 className="font-semibold mb-2">{category.name}</h3>
-                <p className="text-2xl text-[#bd5b4c]">{category.tileCount || 0} tiles</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        
       </div>
     </>
   );

@@ -86,7 +86,7 @@ const AllTiles = () => {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow  overflow-x-auto whitespace-nowrap">
+        <div className="bg-white rounded-lg shadow  overflow-x-auto whitespace-nowrap custom-scrollbar">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr className="bg-gray-50">
