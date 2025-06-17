@@ -14,7 +14,6 @@ const TileColors = () => {
   } = useAuth();
 
   const [newColor, setNewColor] = useState("#000000");
-  const [newNoBackground, setNewNoBackground] = useState(false);
   const [editingColor, setEditingColor] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,9 +26,8 @@ const TileColors = () => {
   const handleAddColor = async (e) => {
     e.preventDefault();
     try {
-      await addTileColor(newColor, newNoBackground);
+      await addTileColor(newColor);
       setNewColor("#000000");
-      setNewNoBackground(false);
     } catch (err) {}
   };
 
@@ -37,14 +35,13 @@ const TileColors = () => {
     setEditingColor({
       id: color._id,
       hexCode: color.hexCode,
-      noBackground: color.noBackground
     });
   };
 
   const handleUpdateColor = async (e) => {
     e.preventDefault();
     try {
-      await updateTileColor(editingColor.id, editingColor.hexCode, editingColor.noBackground);
+      await updateTileColor(editingColor.id, editingColor.hexCode);
       setEditingColor(null);
     } catch (err) {}
   };
@@ -108,95 +105,111 @@ const TileColors = () => {
               </div>
             </div>
 
-            <div>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={editingColor ? editingColor.noBackground : newNoBackground}
-                  onChange={(e) =>
-                    editingColor
-                      ? setEditingColor({
-                          ...editingColor,
-                          noBackground: e.target.checked,
-                        })
-                      : setNewNoBackground(e.target.checked)
-                  }
-                  className="rounded border-gray-300"
-                />
-                <span className="text-sm font-medium">No Background (for PNG images)</span>
-              </label>
+            <div className="flex gap-2 text-sm">
+              <button
+                type="submit"
+                className="bg-[#bd5b4c] text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+                disabled={colorLoading}
+              >
+                {colorLoading
+                  ? editingColor
+                    ? "Updating..."
+                    : "Adding..."
+                  : editingColor
+                  ? "Update Color"
+                  : "Add Color"}
+              </button>
+              {editingColor && (
+                <button
+                  type="button"
+                  onClick={() => setEditingColor(null)}
+                  className=" bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-500 transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#bd5b4c] text-white py-2 px-4 rounded hover:bg-[#a54a3b] transition-colors"
-            >
-              {editingColor ? "Update Color" : "Add Color"}
-            </button>
+            {colorError && (
+              <div className="text-sm text-red-600">{colorError}</div>
+            )}
           </form>
         </div>
-
-        <div className="md:col-span-2 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Color List</h2>
-          {colorLoading ? (
-            <div className="text-center py-4">Loading colors...</div>
-          ) : colorError ? (
-            <div className="text-center py-4 text-red-500">{colorError}</div>
+        <div className="md:col-span-2 bg-white rounded-lg shadow">
+          <h2 className="text-lg font-semibold p-6 border-b">
+            All Tile Colors
+          </h2>
+          {tileColors.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">
+              No colors found. Add your first color!
+            </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {currentColors.map((color) => (
-                <div
-                  key={color._id}
-                  className="relative group border rounded-lg p-2"
-                >
+            <>
+              <div className="divide-y custom-scrollbar overflow-x-auto">
+                {currentColors.map((color) => (
                   <div
-                    className="w-full h-24 rounded-lg mb-2"
-                    style={{ backgroundColor: color.hexCode }}
-                  />
-                  <div className="text-xs text-gray-600 mb-2">{color.hexCode}</div>
-                  {color.noBackground && (
-                    <div className="text-xs text-blue-600 mb-2">No Background</div>
-                  )}
-                  <div className="flex justify-between">
-                    <button
-                      onClick={() => handleEditClick(color)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteColor(color._id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Delete
-                    </button>
+                    key={color._id}
+                    className="p-4 flex items-center justify-between hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-16 h-16 rounded border shadow-sm"
+                        style={{ backgroundColor: color.hexCode }}
+                      />
+                      <div className="text-sm text-gray-600 whitespace-nowrap">
+                        {color.hexCode}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 text-xs whitespace-nowrap">
+                      <button
+                        onClick={() => handleEditClick(color)}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteColor(color._id)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
+                ))}
+              </div>
+              {tileColors.length > itemsPerPage && (
+                <div className="flex justify-center items-center gap-2 mt-4 p-4">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                    disabled={currentPage === 1}
+                  >
+                    Prev
+                  </button>
+                  {[...Array(totalPages)].map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentPage(idx + 1)}
+                      className={`px-3 py-1 border rounded hover:bg-gray-100 ${
+                        currentPage === idx + 1
+                          ? "bg-[#bd5b4c] text-white"
+                          : ""
+                      }`}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-6 flex justify-center space-x-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="px-3 py-1">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>

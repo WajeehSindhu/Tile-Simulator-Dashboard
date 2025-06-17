@@ -31,12 +31,14 @@ exports.createTile = async (req, res) => {
       });
     }
     // Validate background color
-    const bgColor = await Color.findById(backgroundColor);
-    if (!bgColor) {
-      return res.status(400).json({ 
-        error: "Invalid background color selected",
-        details: "The selected background color does not exist in the database"
-      });
+    if (backgroundColor) {
+      const bgColor = await Color.findById(backgroundColor);
+      if (!bgColor) {
+        return res.status(400).json({ 
+          error: "Invalid background color selected",
+          details: "The selected background color does not exist in the database"
+        });
+      }
     }
 
     // Validate main mask
@@ -95,12 +97,12 @@ exports.createTile = async (req, res) => {
       category,
       mainMask: mainMaskUrl,
       mainMaskPublicId,
-      backgroundColor,
+      backgroundColor: backgroundColor || null, // Allow null for no background
       groutShape,
       shapeStyle,
       scale: parseFloat(scale),
       subMasks,
-      colorsUsed: [backgroundColor, ...tileMaskColors]
+      colorsUsed: backgroundColor ? [backgroundColor, ...tileMaskColors] : [...tileMaskColors]
     });
 
    
@@ -108,7 +110,7 @@ exports.createTile = async (req, res) => {
   
 
     const savedTile = await Tile.findById(tile._id)
-      .populate("backgroundColor", "hexCode")
+      .populate("backgroundColor", "hexCode noBackground")
       .populate("category", "name")
       .populate("subMasks.backgroundColor", "hexCode")
       .populate("colorsUsed", "hexCode");
