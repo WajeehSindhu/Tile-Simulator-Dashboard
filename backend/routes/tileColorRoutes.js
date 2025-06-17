@@ -3,9 +3,9 @@ const router = express.Router();
 const Color = require('../models/tileColor');
 // Add a new color
 router.post("/add", async (req, res) => {
-  const { hexCode } = req.body;
+  const { hexCode, noBackground } = req.body;
   try {
-    const newColor = new Color({ hexCode });
+    const newColor = new Color({ hexCode, noBackground });
     await newColor.save();
     res.status(201).json(newColor);
   } catch (error) {
@@ -40,10 +40,10 @@ router.delete("/:id", async (req, res) => {
 // Update a color
 router.put("/:id", async (req, res) => {
   try {
-    const { hexCode } = req.body;
+    const { hexCode, noBackground } = req.body;
     const updated = await Color.findByIdAndUpdate(
       req.params.id,
-      { hexCode },
+      { hexCode, noBackground },
       { new: true }
     );
     if (!updated) {

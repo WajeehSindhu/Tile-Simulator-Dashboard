@@ -127,15 +127,23 @@ const AllTiles = () => {
                         <div className="h-16 w-16 flex-shrink-0 mr-4">
                           <div className="h-full w-full rounded-lg overflow-hidden">
                             {tile.mainMask ? (
-                              <img
-                                src={tile.mainMask}
-                                alt={tile.tileName}
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = 'placeholder-image-url';
+                              <div 
+                                className="h-full w-full"
+                                style={{
+                                  backgroundColor: tile.backgroundColor?.noBackground ? 'transparent' : tile.backgroundColor?.hexCode,
+                                  backgroundImage: tile.backgroundColor?.noBackground ? 'url("data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.2\' fill-rule=\'evenodd\'%3E%3Ccircle cx=\'3\' cy=\'3\' r=\'3\'/%3E%3Ccircle cx=\'13\' cy=\'13\' r=\'3\'/%3E%3C/g%3E%3C/svg%3E")' : 'none'
                                 }}
-                              />
+                              >
+                                <img
+                                  src={tile.mainMask}
+                                  alt={tile.tileName}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = 'placeholder-image-url';
+                                  }}
+                                />
+                              </div>
                             ) : (
                               <div className="h-full w-full bg-gray-200 flex items-center justify-center">
                                 <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

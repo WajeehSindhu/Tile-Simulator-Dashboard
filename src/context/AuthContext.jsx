@@ -234,11 +234,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const addTileColor = async (hexCode) => {
+  const addTileColor = async (hexCode, noBackground) => {
     setColorLoading(true);
     setColorError(null);
     try {
-      const response = await api.post("/api/colors/add", { hexCode });
+      const response = await api.post("/api/colors/add", { hexCode, noBackground });
       setTileColors((prev) => [...prev, response.data]);
       return response.data;
     } catch (error) {
@@ -328,11 +328,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateTileColor = async (id, hexCode) => {
+  const updateTileColor = async (id, hexCode, noBackground) => {
     setColorLoading(true);
     setColorError(null);
     try {
-      const response = await api.put(`/api/colors/${id}`, { hexCode });
+      const response = await api.put(`/api/colors/${id}`, { hexCode, noBackground });
       setTileColors((prev) =>
         prev.map((color) => (color._id === id ? response.data : color))
       );
