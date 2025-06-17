@@ -60,7 +60,6 @@ const Sidebar = () => {
           )}
         </div>
       </NavLink>
-      {/* Tile Simulator */}
       <div>
         <div
           onClick={() => setOpenSimulator(!openSimulator)}
@@ -75,7 +74,6 @@ const Sidebar = () => {
             </span>
           )}
         </div>
-        {/* Submenu */}
         {openSimulator && (
           <div
             className={`mt-1 space-y-1 ${

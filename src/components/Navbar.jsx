@@ -63,7 +63,6 @@ const Navbar = () => {
             </span>
 
             <div className="relative" ref={dropdownRef}>
-              {/* Avatar Button */}
               <div
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="w-10 h-10 border-2 border-[#bd5b4c] bg-white rounded-full overflow-hidden cursor-pointer flex items-center justify-center text-xs font-medium text-gray-500"
@@ -80,7 +79,6 @@ const Navbar = () => {
                 )}
               </div>
 
-              {/* Dropdown */}
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-44 bg-white rounded-md shadow-lg z-50 overflow-hidden transition-all duration-200">
                   <button
@@ -90,7 +88,6 @@ const Navbar = () => {
                     {userImage ? "Change Profile" : "Add Profile"}
                   </button>
 
-                  {/* Remove Photo button */}
                   {userImage && (
                     <button
                       onClick={() => {
@@ -111,7 +108,7 @@ const Navbar = () => {
                 </div>
               )}
 
-              {/* Hidden input */}
+  
               <input
                 ref={fileInputRef}
                 type="file"
