@@ -156,6 +156,7 @@ const TileCategories = () => {
                 <tr className="bg-gray-100">
                   <th className="p-4 border-b text-left">Name</th>
                   <th className="p-4 border-b text-left">Description</th>
+                  <th className="p-4 border-b text-left">Tiles Count</th>
                   <th className="p-4 border-b text-left">Actions</th>
                 </tr>
               </thead>
@@ -168,6 +169,9 @@ const TileCategories = () => {
                     <td className="p-4 text-gray-700 font-bold">{item.name}</td>
                     <td className="p-4 text-gray-500">
                       {item.description || "—"}
+                    </td>
+                    <td className="p-4 text-gray-500">
+                      {item.tileCount || 0}
                     </td>
                     <td className="p-2 space-x-2 text-xs">
                       <button

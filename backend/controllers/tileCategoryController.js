@@ -1,4 +1,5 @@
 const TileCategory = require("../models/tileCategory");
+const Tile = require("../models/tile");
 
 exports.createCategory = async (req, res) => {
   try {
@@ -17,7 +18,19 @@ exports.createCategory = async (req, res) => {
 exports.getCategories = async (req, res) => {
   try {
     const categories = await TileCategory.find().exec();
-    res.json(categories);
+    
+    // Get tile counts for each category
+    const categoriesWithCounts = await Promise.all(
+      categories.map(async (category) => {
+        const tileCount = await Tile.countDocuments({ category: category._id });
+        return {
+          ...category.toObject(),
+          tileCount
+        };
+      })
+    );
+
+    res.json(categoriesWithCounts);
   } catch (error) {
     console.error("Get categories error:", error);
     res.status(500).json({ message: "Failed to get categories" });
