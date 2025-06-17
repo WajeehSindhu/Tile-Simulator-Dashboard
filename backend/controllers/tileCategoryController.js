@@ -18,11 +18,18 @@ exports.createCategory = async (req, res) => {
 exports.getCategories = async (req, res) => {
   try {
     const categories = await TileCategory.find().exec();
+    console.log("Found categories:", categories.map(c => ({ id: c._id, name: c.name })));
     
     // Get tile counts for each category
     const categoriesWithCounts = await Promise.all(
       categories.map(async (category) => {
         const tileCount = await Tile.countDocuments({ category: category._id });
+        console.log(`Category ${category.name} (${category._id}) has ${tileCount} tiles`);
+        
+        // Debug: Get actual tiles for this category
+        const tiles = await Tile.find({ category: category._id });
+        console.log(`Tiles in category ${category.name}:`, tiles.map(t => ({ id: t._id, name: t.tileName, category: t.category })));
+        
         return {
           ...category.toObject(),
           tileCount

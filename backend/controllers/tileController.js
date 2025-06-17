@@ -16,6 +16,15 @@ exports.createTile = async (req, res) => {
       scale,
     } = req.body;
 
+    console.log("Creating tile with data:", {
+      tileName,
+      category,
+      backgroundColor,
+      groutShape,
+      shapeStyle,
+      scale
+    });
+
     // Validate required fields
     if (!tileName) {
       return res.status(400).json({ error: "Tile name is required" });
@@ -29,6 +38,7 @@ exports.createTile = async (req, res) => {
         details: "The selected category does not exist in the database"
       });
     }
+    console.log("Found category:", tileCategory);
 
     // Validate background color
     const bgColor = await Color.findById(backgroundColor);
@@ -103,13 +113,21 @@ exports.createTile = async (req, res) => {
       colorsUsed: [backgroundColor, ...tileMaskColors]
     });
 
+    console.log("Saving tile with category:", category);
     await tile.save();
+    console.log("Tile saved successfully:", tile._id);
 
     const savedTile = await Tile.findById(tile._id)
       .populate("backgroundColor", "hexCode")
       .populate("category", "name")
       .populate("subMasks.backgroundColor", "hexCode")
       .populate("colorsUsed", "hexCode");
+
+    console.log("Saved tile with populated data:", {
+      id: savedTile._id,
+      name: savedTile.tileName,
+      category: savedTile.category
+    });
 
     res.status(201).json(savedTile);
   } catch (error) {
