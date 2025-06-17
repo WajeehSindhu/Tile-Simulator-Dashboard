@@ -218,7 +218,7 @@ const AddTiles = () => {
             }
 
             // Set color hex codes - ensure we're using the populated color data
-            const mainColor = tileToEdit.backgroundColor?.hexCode || "";
+            const mainColor = tileToEdit.backgroundColor ? 'transparent' : "";
             const maskColors = tileToEdit.subMasks?.map(mask => 
               mask.backgroundColor?.hexCode || ""
             ) || [];

@@ -16,7 +16,6 @@ exports.createTile = async (req, res) => {
       scale,
     } = req.body;
 
-
     // Validate required fields
     if (!tileName) {
       return res.status(400).json({ error: "Tile name is required" });
@@ -30,7 +29,8 @@ exports.createTile = async (req, res) => {
         details: "The selected category does not exist in the database"
       });
     }
-    // Validate background color
+
+    // Validate background color if provided
     if (backgroundColor) {
       const bgColor = await Color.findById(backgroundColor);
       if (!bgColor) {
@@ -105,9 +105,7 @@ exports.createTile = async (req, res) => {
       colorsUsed: backgroundColor ? [backgroundColor, ...tileMaskColors] : [...tileMaskColors]
     });
 
-   
     await tile.save();
-  
 
     const savedTile = await Tile.findById(tile._id)
       .populate("backgroundColor", "hexCode noBackground")
@@ -129,7 +127,6 @@ exports.createTile = async (req, res) => {
       }
     }
 
-    // Send detailed error message
     res.status(500).json({ 
       error: "Failed to create tile",
       details: error.message || "An unexpected error occurred while creating the tile"
@@ -225,14 +222,14 @@ exports.updateTile = async (req, res) => {
     const updateData = {
       tileName: tileName || tile.tileName,
       category: category || tile.category,
-      backgroundColor: backgroundColor || tile.backgroundColor,
+      backgroundColor: backgroundColor || null, // Allow null for no background
       groutShape: groutShape || tile.groutShape,
       shapeStyle: shapeStyle || tile.shapeStyle,
       scale: scale !== undefined ? parseFloat(scale) : tile.scale,
       mainMask: tile.mainMask,
       mainMaskPublicId: tile.mainMaskPublicId,
       subMasks: tile.subMasks,
-      colorsUsed: [backgroundColor || tile.backgroundColor] // Initialize with main color
+      colorsUsed: backgroundColor ? [backgroundColor] : [] // Initialize with main color if provided
     };
 
     // If there are sub mask colors, add them to colorsUsed
@@ -378,7 +375,7 @@ exports.updateTile = async (req, res) => {
         runValidators: true,
         context: 'query'
       }
-    ).populate("backgroundColor", "hexCode")
+    ).populate("backgroundColor", "hexCode noBackground")
      .populate("category", "name")
      .populate("subMasks.backgroundColor", "hexCode")
      .populate("colorsUsed", "hexCode");
