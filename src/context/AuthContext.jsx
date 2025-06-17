@@ -14,7 +14,6 @@ const api = axios.create({
 // Add request interceptor for debugging
 api.interceptors.request.use(
   (config) => {
-    console.log('Making request to:', config.url);
     return config;
   },
   (error) => {
@@ -26,7 +25,6 @@ api.interceptors.request.use(
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
-    console.log('Response received:', response.status);
     return response;
   },
   (error) => {

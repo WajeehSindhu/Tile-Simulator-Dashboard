@@ -15,7 +15,6 @@ const SignIn = () => {
     e.preventDefault();
     try {
       await signIn({ email, password });
-      console.log("Successfully signed in");
     } catch (err) {
       console.error("Error Signing in", err);
     }
