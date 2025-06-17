@@ -171,7 +171,7 @@ const TileCategories = () => {
                       {item.description || "—"}
                     </td>
                     <td className="p-4 text-gray-500">
-                      {item.tileCount || 0}
+                      {item.tileCount || 0} tiles
                     </td>
                     <td className="p-2 space-x-2 text-xs">
                       <button
