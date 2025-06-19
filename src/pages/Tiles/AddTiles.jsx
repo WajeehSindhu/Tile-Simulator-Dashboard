@@ -241,7 +241,7 @@ const AddTiles = () => {
     return () => {
       isMounted = false;
     };
-  }, [id, isEditing, tiles,fetchTiles,fetchTileColors,fetchTileCategories,fetchGroutShapes,fetchShapeStyles,fetchScaleRange]);
+  }, [id, isEditing, tiles]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
