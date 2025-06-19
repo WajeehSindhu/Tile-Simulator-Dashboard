@@ -171,6 +171,18 @@ const AddTiles = () => {
 
   // Load existing tile data if editing
   useEffect(() => {
+    // Clear edit-specific localStorage and reset state when ID changes
+    if (isEditing) {
+      localStorage.removeItem('editTileFormData');
+      localStorage.removeItem('editTilePreviews');
+      localStorage.removeItem('editTileColorHexCodes');
+      setFormData(emptyFormState);
+      setMainMaskPreview(null);
+      setTileMaskPreviews([]);
+      setSelectedColorHexCodes({ main: '', masks: [] });
+      setDeletedSubMasks([]);
+    }
+
     let isMounted = true;
 
     const fetchData = async () => {
