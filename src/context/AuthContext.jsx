@@ -373,6 +373,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Fetch a single tile by ID
+  const fetchTileById = async (id) => {
+    setTileLoading(true);
+    setTileError(null);
+    try {
+      const response = await api.get(`/api/tiles/${id}`);
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.error || 'Failed to fetch tile';
+      setTileError(errMsg);
+      throw new Error(errMsg);
+    } finally {
+      setTileLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -413,6 +429,7 @@ export const AuthProvider = ({ children }) => {
         fetchGroutShapes,
         fetchShapeStyles,
         fetchScaleRange,
+        fetchTileById,
       }}
     >
       {children}

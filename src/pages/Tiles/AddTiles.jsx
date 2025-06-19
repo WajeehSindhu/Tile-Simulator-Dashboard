@@ -28,7 +28,8 @@ const AddTiles = () => {
     scaleRange,
     fetchGroutShapes,
     fetchShapeStyles,
-    fetchScaleRange
+    fetchScaleRange,
+    fetchTileById
   } = useAuth();
 
   const emptyFormState = {
@@ -178,15 +179,14 @@ const AddTiles = () => {
         await Promise.all([
           fetchTileColors(),
           fetchTileCategories(),
-          fetchTiles(),
           fetchGroutShapes(),
           fetchShapeStyles(),
           fetchScaleRange()
         ]);
 
         // Only then proceed with setting form data if editing
-        if (isEditing && tiles) {
-          const tileToEdit = tiles.find((t) => t._id === id);
+        if (isEditing && id) {
+          const tileToEdit = await fetchTileById(id);
           if (tileToEdit) {
             // Ensure we have the color data
             if (!tileToEdit.backgroundColor || !tileToEdit.subMasks) {
@@ -196,7 +196,7 @@ const AddTiles = () => {
 
             const newFormData = {
               tileName: tileToEdit.tileName || "",
-              category: tileToEdit.category?._id || "",
+              category: tileToEdit.category?._id || tileToEdit.category || "",
               backgroundColor: tileToEdit.backgroundColor?._id || tileToEdit.backgroundColor || "",
               groutShape: tileToEdit.groutShape || "Square",
               shapeStyle: tileToEdit.shapeStyle || "Square",
@@ -241,7 +241,7 @@ const AddTiles = () => {
     return () => {
       isMounted = false;
     };
-  }, [id, isEditing, tiles]);
+  }, [id, isEditing]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
