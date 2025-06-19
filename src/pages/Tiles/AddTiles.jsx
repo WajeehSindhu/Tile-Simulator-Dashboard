@@ -520,13 +520,6 @@ const AddTiles = () => {
     });
   };
 
-  if (categoryLoading || colorLoading || tileCategories.length === 0 || tileColors.length === 0) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-lg">Loading categories and colors...</div></div>;
-  }
-  if (categoryError || colorError) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-lg text-red-600">{categoryError || colorError}</div></div>;
-  }
-
   return (
     <>
       <Helmet>

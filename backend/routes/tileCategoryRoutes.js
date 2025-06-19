@@ -21,7 +21,19 @@ router.post("/categories", async (req, res) => {
 router.get("/categories", async (req, res) => {
   try {
     const categories = await TileCategory.find().sort({ createdAt: -1 });
-    res.json(categories);
+    
+    // Get tile counts for each category
+    const categoriesWithCounts = await Promise.all(
+      categories.map(async (category) => {
+        const tileCount = await Tile.countDocuments({ category: category._id });
+        return {
+          ...category.toObject(),
+          tileCount
+        };
+      })
+    );
+
+    res.json(categoriesWithCounts);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
