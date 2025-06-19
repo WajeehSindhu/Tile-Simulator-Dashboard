@@ -169,21 +169,7 @@ const AddTiles = () => {
     }
   }, [selectedColorHexCodes, isEditing]);
 
-  // Add this effect to reset state only when id changes
-  useEffect(() => {
-    if (isEditing) {
-      localStorage.removeItem('editTileFormData');
-      localStorage.removeItem('editTilePreviews');
-      localStorage.removeItem('editTileColorHexCodes');
-      setFormData(emptyFormState);
-      setMainMaskPreview(null);
-      setTileMaskPreviews([]);
-      setSelectedColorHexCodes({ main: '', masks: [] });
-      setDeletedSubMasks([]);
-    }
-  }, [id]);
-
-  // Update the existing effect to remove the reset logic
+  // Update the data fetching effect
   useEffect(() => {
     let isMounted = true;
 
@@ -200,6 +186,7 @@ const AddTiles = () => {
 
         // Only then proceed with setting form data if editing
         if (isEditing && id) {
+          // Always fetch the latest tile data from the backend
           const tileToEdit = await fetchTileById(id);
           console.log('Fetched tile to edit:', tileToEdit); // Debug log
           if (tileToEdit) {
@@ -221,7 +208,6 @@ const AddTiles = () => {
               tileMaskColors: tileToEdit.subMasks?.map(mask => mask.backgroundColor?._id || mask.backgroundColor) || [],
             };
 
-            console.log('Setting form data:', newFormData); // Debug log
             setFormData(newFormData);
 
             // Set previews
@@ -243,6 +229,8 @@ const AddTiles = () => {
               main: mainColor,
               masks: maskColors
             });
+
+            setDeletedSubMasks([]); // Reset deleted submasks for this tile
           }
         }
       } catch (error) {
