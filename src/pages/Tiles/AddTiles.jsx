@@ -46,18 +46,7 @@ const AddTiles = () => {
 
   // Initialize state from localStorage or default values
   const getInitialFormData = () => {
-    if (isEditing) {
-      // For edit mode, try to load from edit-specific localStorage
-      const savedFormData = localStorage.getItem('editTileFormData');
-      if (savedFormData) {
-        try {
-          return JSON.parse(savedFormData);
-        } catch (error) {
-          console.error('Error parsing saved edit form data:', error);
-          return emptyFormState;
-        }
-      }
-    } else {
+    if (!isEditing) {
       // For add mode, try to load from add-specific localStorage
       const savedFormData = localStorage.getItem('addTileFormData');
       if (savedFormData) {
@@ -73,18 +62,7 @@ const AddTiles = () => {
   };
 
   const getInitialPreviews = () => {
-    if (isEditing) {
-      // For edit mode, try to load from edit-specific localStorage
-      const savedPreviews = localStorage.getItem('editTilePreviews');
-      if (savedPreviews) {
-        try {
-          return JSON.parse(savedPreviews);
-        } catch (error) {
-          console.error('Error parsing saved edit previews:', error);
-          return { main: null, masks: [] };
-        }
-      }
-    } else {
+    if (!isEditing) {
       // For add mode, try to load from add-specific localStorage
       const savedPreviews = localStorage.getItem('addTilePreviews');
       if (savedPreviews) {
@@ -100,18 +78,7 @@ const AddTiles = () => {
   };
 
   const getInitialColorHexCodes = () => {
-    if (isEditing) {
-      // For edit mode, try to load from edit-specific localStorage
-      const savedColorHexCodes = localStorage.getItem('editTileColorHexCodes');
-      if (savedColorHexCodes) {
-        try {
-          return JSON.parse(savedColorHexCodes);
-        } catch (error) {
-          console.error('Error parsing saved edit color hex codes:', error);
-          return { main: "", masks: [] };
-        }
-      }
-    } else {
+    if (!isEditing) {
       // For add mode, try to load from add-specific localStorage
       const savedColorHexCodes = localStorage.getItem('addTileColorHexCodes');
       if (savedColorHexCodes) {
@@ -119,11 +86,11 @@ const AddTiles = () => {
           return JSON.parse(savedColorHexCodes);
         } catch (error) {
           console.error('Error parsing saved add color hex codes:', error);
-          return { main: "", masks: [] };
+          return { main: '', masks: [] };
         }
       }
     }
-    return { main: "", masks: [] };
+    return { main: '', masks: [] };
   };
 
   const [formData, setFormData] = useState(getInitialFormData());
@@ -134,25 +101,16 @@ const AddTiles = () => {
   const [selectedColorHexCodes, setSelectedColorHexCodes] = useState(getInitialColorHexCodes());
   const [deletedSubMasks, setDeletedSubMasks] = useState([]);
 
-  // Save form data while working
+  // Save form data while working (add mode only)
   useEffect(() => {
-    if (formData.tileName) {
-      if (isEditing) {
-        localStorage.setItem('editTileFormData', JSON.stringify(formData));
-      } else {
-        localStorage.setItem('addTileFormData', JSON.stringify(formData));
-      }
+    if (!isEditing && formData.tileName) {
+      localStorage.setItem('addTileFormData', JSON.stringify(formData));
     }
   }, [formData, isEditing]);
 
-  // Save previews when they change
+  // Save previews when they change (add mode only)
   useEffect(() => {
-    if (isEditing) {
-      localStorage.setItem('editTilePreviews', JSON.stringify({
-        main: mainMaskPreview,
-        masks: tileMaskPreviews
-      }));
-    } else {
+    if (!isEditing) {
       localStorage.setItem('addTilePreviews', JSON.stringify({
         main: mainMaskPreview,
         masks: tileMaskPreviews
@@ -160,11 +118,9 @@ const AddTiles = () => {
     }
   }, [mainMaskPreview, tileMaskPreviews, isEditing]);
 
-  // Save color hex codes when they change
+  // Save color hex codes when they change (add mode only)
   useEffect(() => {
-    if (isEditing) {
-      localStorage.setItem('editTileColorHexCodes', JSON.stringify(selectedColorHexCodes));
-    } else {
+    if (!isEditing) {
       localStorage.setItem('addTileColorHexCodes', JSON.stringify(selectedColorHexCodes));
     }
   }, [selectedColorHexCodes, isEditing]);
@@ -195,10 +151,12 @@ const AddTiles = () => {
           const tileToEdit = await fetchTileById(id);
           console.log('Fetched tile to edit:', tileToEdit); // Debug log
           if (tileToEdit) {
-            // Ensure we have the color data
-            if (!tileToEdit.backgroundColor || !tileToEdit.subMasks) {
-              console.error("Missing color data in tile:", tileToEdit);
-              return;
+            // Only warn, but do not return early
+            if (!tileToEdit.backgroundColor) {
+              console.warn("No background color in tile:", tileToEdit);
+            }
+            if (!tileToEdit.subMasks) {
+              console.warn("No subMasks in tile:", tileToEdit);
             }
 
             const newFormData = {
@@ -494,10 +452,12 @@ const AddTiles = () => {
         tileMasks: prev.tileMasks.filter((_, idx) => idx !== index),
         tileMaskColors: prev.tileMaskColors.filter((_, idx) => idx !== index),
       };
-      // Save updated mask colors to localStorage
-      localStorage.setItem('tileMaskData', JSON.stringify({
-        tileMaskColors: newFormData.tileMaskColors,
-      }));
+      // Save updated mask colors to localStorage (add mode only)
+      if (!isEditing) {
+        localStorage.setItem('tileMaskData', JSON.stringify({
+          tileMaskColors: newFormData.tileMaskColors,
+        }));
+      }
       return newFormData;
     });
 
@@ -511,11 +471,13 @@ const AddTiles = () => {
 
     setTileMaskPreviews((prev) => {
       const newPreviews = prev.filter((_, idx) => idx !== index);
-      // Save updated previews to localStorage
-      localStorage.setItem('tilePreviews', JSON.stringify({
-        main: mainMaskPreview,
-        masks: newPreviews
-      }));
+      // Save updated previews to localStorage (add mode only)
+      if (!isEditing) {
+        localStorage.setItem('tilePreviews', JSON.stringify({
+          main: mainMaskPreview,
+          masks: newPreviews
+        }));
+      }
       return newPreviews;
     }); 
 
@@ -524,8 +486,10 @@ const AddTiles = () => {
         ...prev,
         masks: prev.masks.filter((_, idx) => idx !== index),
       };
-      // Save updated color hex codes to localStorage
-      localStorage.setItem('tileColorHexCodes', JSON.stringify(newColorHexCodes));
+      // Save updated color hex codes to localStorage (add mode only)
+      if (!isEditing) {
+        localStorage.setItem('tileColorHexCodes', JSON.stringify(newColorHexCodes));
+      }
       return newColorHexCodes;
     });
   };
