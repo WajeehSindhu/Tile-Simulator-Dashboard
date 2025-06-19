@@ -168,8 +168,8 @@ exports.getTiles = async (req, res) => {
 exports.getTileById = async (req, res) => {
   try {
     const tile = await Tile.findById(req.params.id)
-      .populate("backgroundColor", "hexCode")
-      .populate("subMasks.backgroundColor", "hexCode");
+      .populate("backgroundColor", "_id hexCode")
+      .populate("subMasks.backgroundColor", "_id hexCode");
 
     if (!tile) {
       return res.status(404).json({ error: "Tile not found" });
