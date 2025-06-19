@@ -142,7 +142,23 @@ exports.getTiles = async (req, res) => {
       .populate("subMasks.backgroundColor", "hexCode")
       .sort("-createdAt");
 
-    res.json(tiles);
+    // Add base URL to image paths if needed
+    const baseUrl = process.env.BASE_URL || 'http://localhost:5000/';
+    const tilesWithFullUrls = tiles.map(tile => {
+      const tileObj = tile.toObject();
+      if (tileObj.mainMask && !tileObj.mainMask.startsWith('http')) {
+        tileObj.mainMask = baseUrl + tileObj.mainMask.replace(/^\/+/, '');
+      }
+      if (Array.isArray(tileObj.subMasks)) {
+        tileObj.subMasks = tileObj.subMasks.map(mask => ({
+          ...mask,
+          image: mask.image && !mask.image.startsWith('http') ? baseUrl + mask.image.replace(/^\/+/, '') : mask.image
+        }));
+      }
+      return tileObj;
+    });
+
+    res.json(tilesWithFullUrls);
   } catch (error) {
     console.error("Get tiles error:", error);
     res.status(500).json({ error: "Failed to fetch tiles" });
@@ -159,7 +175,20 @@ exports.getTileById = async (req, res) => {
       return res.status(404).json({ error: "Tile not found" });
     }
 
-    res.json(tile);
+    // Add base URL to image paths if needed
+    const baseUrl = process.env.BASE_URL || 'http://localhost:5000/';
+    const tileObj = tile.toObject();
+    if (tileObj.mainMask && !tileObj.mainMask.startsWith('http')) {
+      tileObj.mainMask = baseUrl + tileObj.mainMask.replace(/^\/+/, '');
+    }
+    if (Array.isArray(tileObj.subMasks)) {
+      tileObj.subMasks = tileObj.subMasks.map(mask => ({
+        ...mask,
+        image: mask.image && !mask.image.startsWith('http') ? baseUrl + mask.image.replace(/^\/+/, '') : mask.image
+      }));
+    }
+
+    res.json(tileObj);
   } catch (error) {
     console.error("Get tile error:", error);
     res.status(500).json({ error: "Failed to fetch tile" });
