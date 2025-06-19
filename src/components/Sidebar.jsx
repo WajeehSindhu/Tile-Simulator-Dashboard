@@ -36,20 +36,18 @@ const Sidebar = () => {
 
   const linkClass = ({ isActive }) =>
     `block px-3 py-2 rounded-md whitespace-nowrap transition-all duration-300 ease hover:text-[#BD5B4C] font-poppins font-light ${
-      isActive ? 'text-[#BD5B4C] font-semibold bg-gray-700' : ''
+      isActive ? "text-[#BD5B4C] font-semibold bg-gray-700" : ""
     }`;
-
 
   return (
     <div
       className={`${
-        isSidebarOpen ? 'w-64 p-4' : 'w-auto py-5'
-      } min-h-screen bg-[#212529] text-white  space-y-2 transition-all duration-300 relative`}
+        isSidebarOpen ? "w-64 p-4" : "w-auto py-5"
+      } min-h-screen bg-[#212529] text-white space-y-2 transition-all duration-300 relative`}
     >
+      {/* Dashboard Link */}
       <NavLink to="/dashboard" className={linkClass}>
-        <div
-          className="flex items-center gap-3 group relative"
-        >
+        <div className="flex items-center gap-3 group relative">
           <AiOutlineDashboard className="text-xl" />
           {isSidebarOpen ? (
             <span className="font-light text-base">Dashboard</span>
@@ -60,9 +58,13 @@ const Sidebar = () => {
           )}
         </div>
       </NavLink>
+
+      {/* Tile Simulator */}
       <div>
         <div
-          onClick={() => setOpenSimulator(!openSimulator)}
+          onClick={() => {
+            if (isSmallScreen) setOpenSimulator(!openSimulator);
+          }}
           className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-gray-700 rounded-md hover:text-[#BD5B4C] transition-all duration-300 group relative"
         >
           <IoGridSharp className="text-xl" />
@@ -74,12 +76,14 @@ const Sidebar = () => {
             </span>
           )}
         </div>
-        {openSimulator && (
+
+        {/* Sub-links: always show on large screen, toggle on small screen */}
+        {(openSimulator || !isSmallScreen) && (
           <div
             className={`mt-1 space-y-1 ${
               !isSidebarOpen
-                ? 'absolute left-16 top-14 bg-[#2C2F33] px-6 py-2 rounded-md z-50'
-                : ''
+                ? "absolute left-16 top-14 bg-[#2C2F33] px-6 py-2 rounded-md z-50"
+                : ""
             }`}
           >
             <NavLink to="/dashboard/all-tiles" className={linkClass}>
