@@ -169,6 +169,11 @@ const AddTiles = () => {
     }
   }, [selectedColorHexCodes, isEditing]);
 
+  // Add debug log to see what is being set as formData
+  useEffect(() => {
+    console.log('Current formData state:', formData);
+  }, [formData]);
+
   // Update the data fetching effect
   useEffect(() => {
     let isMounted = true;
@@ -208,6 +213,7 @@ const AddTiles = () => {
               tileMaskColors: tileToEdit.subMasks?.map(mask => mask.backgroundColor?._id || mask.backgroundColor) || [],
             };
 
+            console.log('Setting form data:', newFormData); // Debug log
             setFormData(newFormData);
 
             // Set previews
