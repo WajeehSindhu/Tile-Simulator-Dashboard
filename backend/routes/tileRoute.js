@@ -30,7 +30,8 @@ router.post(
   "/",
   upload.fields([
     { name: "mainMask", maxCount: 1 },
-    { name: "tileMasks", maxCount: 10 }
+    { name: "tileMasks", maxCount: 10 },
+    { name: "borderMask", maxCount: 1 }
   ]),
   createTile
 );
@@ -46,7 +47,8 @@ router.put(
   "/:id",
   upload.fields([
     { name: "mainMask", maxCount: 1 },
-    { name: "tileMasks", maxCount: 10 }
+    { name: "tileMasks", maxCount: 10 },
+    { name: "borderMask", maxCount: 1 }
   ]),
   updateTile
 );

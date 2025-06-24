@@ -85,6 +85,25 @@ exports.createTile = async (req, res) => {
       }
     }
 
+    // Validate border color if provided
+    if (req.body.borderColor) {
+      const borderColorObj = await Color.findById(req.body.borderColor);
+      if (!borderColorObj) {
+        return res.status(400).json({
+          error: "Invalid border color selected",
+          details: "The selected border color does not exist in the database"
+        });
+      }
+    }
+
+    // Handle border mask upload
+    let borderMaskUrl = null;
+    let borderMaskPublicId = null;
+    if (req.files?.borderMask?.[0]) {
+      borderMaskUrl = req.files.borderMask[0].path;
+      borderMaskPublicId = req.files.borderMask[0].filename;
+    }
+
     // Construct sub mask array
     const subMasks = tileMasks.map((mask, index) => ({
       image: mask.path,
@@ -102,7 +121,14 @@ exports.createTile = async (req, res) => {
       shapeStyle,
       scale: parseFloat(scale),
       subMasks,
-      colorsUsed: backgroundColor ? [backgroundColor, ...tileMaskColors] : [...tileMaskColors]
+      borderMask: borderMaskUrl,
+      borderMaskPublicId: borderMaskPublicId,
+      borderColor: req.body.borderColor || null,
+      colorsUsed: [
+        ...(backgroundColor ? [backgroundColor] : []),
+        ...(req.body.borderColor ? [req.body.borderColor] : []),
+        ...tileMaskColors
+      ]
     });
 
     await tile.save();
@@ -125,6 +151,9 @@ exports.createTile = async (req, res) => {
       for (const mask of req.files.tileMasks) {
         await deleteFromCloudinary(mask.filename);
       }
+    }
+    if (req.files?.borderMask?.[0]) {
+      await deleteFromCloudinary(req.files.borderMask[0].filename);
     }
 
     res.status(500).json({ 
@@ -257,6 +286,9 @@ exports.updateTile = async (req, res) => {
       mainMask: tile.mainMask,
       mainMaskPublicId: tile.mainMaskPublicId,
       subMasks: tile.subMasks,
+      borderMask: tile.borderMask,
+      borderMaskPublicId: tile.borderMaskPublicId,
+      borderColor: tile.borderColor,
       colorsUsed: backgroundColor ? [backgroundColor] : [] // Initialize with main color if provided
     };
 
@@ -394,6 +426,30 @@ exports.updateTile = async (req, res) => {
       }
     }
 
+    // Handle border mask update if new file is uploaded
+    if (req.files?.borderMask?.[0]) {
+      // Delete old border mask from Cloudinary
+      if (tile.borderMaskPublicId) {
+        await deleteFromCloudinary(tile.borderMaskPublicId);
+      }
+      updateData.borderMask = req.files.borderMask[0].path;
+      updateData.borderMaskPublicId = req.files.borderMask[0].filename;
+    }
+
+    // Handle border color update
+    if (req.body.borderColor) {
+      updateData.borderColor = req.body.borderColor;
+      updateData.colorsUsed = [
+        ...(backgroundColor ? [backgroundColor] : []),
+        req.body.borderColor,
+        ...(req.body.tileMaskColors
+          ? (Array.isArray(req.body.tileMaskColors)
+              ? req.body.tileMaskColors
+              : [req.body.tileMaskColors])
+          : tile.subMasks.map(mask => mask.backgroundColor))
+      ];
+    }
+
     // Update the tile with all changes
     const updatedTile = await Tile.findByIdAndUpdate(
       req.params.id,
@@ -424,6 +480,9 @@ exports.updateTile = async (req, res) => {
       for (const mask of req.files.tileMasks) {
         await deleteFromCloudinary(mask.filename);
       }
+    }
+    if (req.files?.borderMask?.[0]) {
+      await deleteFromCloudinary(req.files.borderMask[0].filename);
     }
 
     res.status(500).json({

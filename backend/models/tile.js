@@ -62,7 +62,16 @@ const tileSchema = new mongoose.Schema({
   type: mongoose.Schema.Types.ObjectId,
   ref: 'Color'
 }],
-
+  borderMask: {
+    type: String  // Path to stored border mask image file
+  },
+  borderMaskPublicId: {
+    type: String  // Cloudinary public ID for border mask
+  },
+  borderColor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Color'
+  },
 });
 
 // Add middleware to clean up Cloudinary images before deletion
