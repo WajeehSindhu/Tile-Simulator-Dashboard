@@ -125,7 +125,7 @@ const SignIn = () => {
                 <div className="text-sm font-poppins">
                   <Link
                     to="/forgot-password"
-                    className="font-medium text-[#bd5b4c] hover:text-red-800 transition duration-150 ease-in-out"
+                    className="font-poppins font-medium text-[#bd5b4c] hover:text-red-800 transition duration-150 ease-in-out"
                   >
                     Forgot your password ?
                   </Link>

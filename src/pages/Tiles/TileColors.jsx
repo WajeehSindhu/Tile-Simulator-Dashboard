@@ -78,7 +78,7 @@ const TileColors = () => {
 
       <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">
+          <h2 className="text-lg font-semibold mb-4 font-poppins">
             {editingColor ? "Edit Color" : "Add New Color"}
           </h2>
           <form
@@ -86,7 +86,7 @@ const TileColors = () => {
             className="space-y-4"
           >
             <div>
-              <label className="block text-sm font-medium mb-1">Color</label>
+              <label className="block text-sm font-medium mb-1 font-poppins">Color</label>
               <input
                 type="color"
                 value={editingColor ? editingColor.hexCode : newColor}
@@ -100,7 +100,7 @@ const TileColors = () => {
                 }
                 className="w-full h-10 cursor-pointer border rounded"
               />
-              <div className="mt-2 text-sm text-gray-500">
+              <div className="mt-2 text-sm text-gray-500 font-poppins">
                 {editingColor ? editingColor.hexCode : newColor}
               </div>
             </div>
@@ -108,7 +108,7 @@ const TileColors = () => {
             <div className="flex gap-2 text-sm">
               <button
                 type="submit"
-                className="bg-[#bd5b4c] text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+                className="bg-[#bd5b4c] font-poppins text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
                 disabled={colorLoading}
               >
                 {colorLoading
@@ -123,23 +123,23 @@ const TileColors = () => {
                 <button
                   type="button"
                   onClick={() => setEditingColor(null)}
-                  className=" bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-500 transition-colors"
+                  className=" bg-gray-300 font-poppins text-gray-800 px-4 py-2 rounded hover:bg-gray-500 transition-colors"
                 >
                   Cancel
                 </button>
               )}
             </div>
             {colorError && (
-              <div className="text-sm text-red-600">{colorError}</div>
+              <div className="text-sm text-red-600 font-poppins">{colorError}</div>
             )}
           </form>
         </div>
         <div className="md:col-span-2 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-semibold p-6 border-b">
+          <h2 className="text-lg font-semibold p-6 border-b font-poppins">
             All Tile Colors
           </h2>
           {tileColors.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="p-6 text-center font-poppins text-gray-500">
               No colors found. Add your first color!
             </div>
           ) : (

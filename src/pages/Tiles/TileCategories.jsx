@@ -93,33 +93,33 @@ const TileCategories = () => {
       </Helmet>
 
       <div className="p-6 bg-gray-100 min-h-screen">
-        <h1 className="text-2xl font-semibold mb-4">Tile Categories</h1>
+        <h1 className="text-2xl font-semibold mb-4 font-poppins">Tile Categories</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Form */}
           <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-lg font-medium mb-4">
+            <h2 className="text-lg font-medium mb-4 font-poppins">
               {editingId ? "Edit Category" : "Add New Category"}
             </h2>
 
             {successMessage && (
-              <p className="mb-4 text-green-600 text-sm">{successMessage}</p>
+              <p className="mb-4 text-green-600 text-sm font-poppins">{successMessage}</p>
             )}
             {errorMessage && (
-              <p className="mb-4 text-red-600 text-sm">{errorMessage}</p>
+              <p className="mb-4 text-red-600 text-sm font-poppins">{errorMessage}</p>
             )}
 
             <form onSubmit={handleSubmit}>
-              <label className="block mb-2 text-sm font-medium">Name</label>
+              <label className="block mb-2 text-sm font-medium font-poppins">Name</label>
               <input
                 name="name"
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full mb-4 border border-gray-300 rounded p-2"
+                className="w-full font-poppins mb-4 border border-gray-300 rounded p-2"
                 required
               />
-              <label className="block mb-2 text-sm font-medium">
+              <label className="block mb-2 text-sm font-medium font-poppins">
                 Description
               </label>
               <textarea
@@ -127,12 +127,12 @@ const TileCategories = () => {
                 rows="4"
                 value={formData.description}
                 onChange={handleChange}
-                className="w-full mb-4 border border-gray-300 rounded p-2"
+                className="w-full mb-4 font-poppins border border-gray-300 rounded p-2"
               />
               <div className="flex flex-wrap gap-2">
                 <button
                   type="submit"
-                  className="bg-[#BD5B4C] text-white px-4 py-2 rounded text-sm"
+                  className="bg-[#BD5B4C] font-poppins text-white px-4 py-2 rounded text-sm"
                 >
                   {editingId ? "Update Category" : "Add New Category"}
                 </button>
@@ -140,7 +140,7 @@ const TileCategories = () => {
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="bg-gray-300 text-black px-4 py-2 rounded text-sm"
+                    className="bg-gray-300 font-poppins text-black px-4 py-2 rounded text-sm"
                   >
                     Cancel
                   </button>
@@ -152,7 +152,7 @@ const TileCategories = () => {
           {/* Table */}
           <div className="md:col-span-2">
             <div className="overflow-x-auto custom-scrollbar">
-            <table className="min-w-full bg-white border border-gray-300 rounded text-sm">
+            <table className="min-w-full font-poppins bg-white border border-gray-300 rounded text-sm">
               <thead>
                 <tr className="bg-gray-100">
                   <th className="p-4 border-b text-left whitespace-nowrap">Name</th>
@@ -176,13 +176,13 @@ const TileCategories = () => {
                     </td>
                     <td className="p-2 space-x-2 text-xs whitespace-nowrap">
                       <button
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:underline font-poppins"
                         onClick={() => handleEdit(item)}
                       >
                         Edit
                       </button>
                       <button
-                        className="text-red-600 hover:underline"
+                        className="text-red-600 hover:underline font-poppins"
                         onClick={() => handleDelete(item)}
                       >
                         Delete

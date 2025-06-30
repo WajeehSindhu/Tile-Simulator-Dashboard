@@ -54,7 +54,7 @@ const Navbar = () => {
               className="h-8 w-auto object-cover"
               loading="lazy"
             />
-            <span className="font-poppins text-xl text-white">Lili Tile</span>
+            <span className="font-poppins text-xl text-white font-light">Lili Tile</span>
           </Link>
 
           <div className="flex items-center gap-4">
@@ -94,14 +94,14 @@ const Navbar = () => {
                         localStorage.removeItem("userImage");
                         setUserImage("");
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-poppins font-light"
                     >
                       Remove Profile
                     </button>
                   )}
                   <button
                     onClick={signOut}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-poppins font-light"
                   >
                     Sign Out
                   </button>

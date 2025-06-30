@@ -50,7 +50,7 @@ const Sidebar = () => {
         <div className="flex items-center gap-3 group relative">
           <AiOutlineDashboard className="text-xl" />
           {isSidebarOpen ? (
-            <span className="font-light text-base">Dashboard</span>
+            <span className="font-light text-base font-poppins">Dashboard</span>
           ) : (
             <span className="absolute left-10 font-poppins bg-black text-white text-xs px-2 py-1 rounded shadow-md hidden group-hover:block whitespace-nowrap z-50">
               Dashboard

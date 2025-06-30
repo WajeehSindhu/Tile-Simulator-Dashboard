@@ -77,7 +77,7 @@ const ForgetPassword = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${isLoading ? 'bg-[#bd5b4c]/60 cursor-not-allowed' : 'bg-[#bd5b4c] hover:bg-red-700'
+                className={`font-poppins group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${isLoading ? 'bg-[#bd5b4c]/60 cursor-not-allowed' : 'bg-[#bd5b4c] hover:bg-red-700'
                   } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#bd5b4c] font-poppins`}
               >
                 {isLoading ? 'Sending...' : 'Send reset instructions'}

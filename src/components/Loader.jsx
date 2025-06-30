@@ -36,7 +36,7 @@ const Loader = () => {
             style={{ width: `${progress}%` }}
           ></div>
         </div>
-        <div className="mt-4 text-gray-600">Loading... {progress}%</div>
+        <div className="mt-4 text-gray-600 font-poppins font-light">Loading... {progress}%</div>
       </div>
     </div>
   );

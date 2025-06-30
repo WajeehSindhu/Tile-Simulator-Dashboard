@@ -71,10 +71,10 @@ const AllTiles = () => {
 
       <div className="p-6 bg-gray-100 min-h-screen">
         <div className="flex flex-col sm:flex-row justify-start items-start sm:justify-between sm:items-center mb-6 ">
-          <h1 className="text-2xl font-semibold">All Tiles</h1>
+          <h1 className="text-2xl font-semibold font-poppins">All Tiles</h1>
           <Link
             to="/dashboard/tiles/add"
-            className="bg-[#bd5b4c] text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+            className="bg-[#bd5b4c] text-white px-4 py-2 font-poppins rounded hover:bg-red-700 transition-colors"
           >
             Add New Tile
           </Link>
@@ -89,8 +89,8 @@ const AllTiles = () => {
         <div className="bg-white rounded-lg shadow  overflow-x-auto whitespace-nowrap custom-scrollbar">
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <tr className="bg-gray-50 font-poppins">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 font-poppins uppercase tracking-wider">
                   Title
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -104,7 +104,7 @@ const AllTiles = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200 font-poppins">
               {loading ? (
                 <tr>
                   <td colSpan="4" className="text-center py-4">

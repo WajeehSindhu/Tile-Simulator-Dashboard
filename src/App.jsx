@@ -11,6 +11,7 @@ import AddTiles from './pages/Tiles/AddTiles';
 import TileCategories from './pages/Tiles/TileCategories';
 import TileColors from './pages/Tiles/TileColors';
 import Submissions from './pages/Tiles/Submissions';
+import SubmissionDetail from './pages/Tiles/SubmissionDetail';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Loader from './components/Loader';
 import './index.css'; 
@@ -122,6 +123,16 @@ const AppRoutes = () => {
           <PrivateRoute>
             <DashboardLayout>
               <Submissions />
+            </DashboardLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/dashboard/submissions/:id"
+        element={
+          <PrivateRoute>
+            <DashboardLayout>
+              <SubmissionDetail />
             </DashboardLayout>
           </PrivateRoute>
         }

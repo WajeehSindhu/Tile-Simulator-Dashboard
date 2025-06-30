@@ -511,13 +511,13 @@ const AddTiles = () => {
       <div className="p-6 bg-gray-100 min-h-screen">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-semibold">
+            <h1 className="text-2xl font-semibold font-poppins">
               {isEditing ? "Edit Tile" : "Add New Tile"}
             </h1>
           </div>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="font-poppins bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
@@ -530,7 +530,7 @@ const AddTiles = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Tile Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="font-poppins block text-sm font-medium text-gray-700 mb-1">
                   Tile Name
                 </label>
                 <input
@@ -538,18 +538,18 @@ const AddTiles = () => {
                   name="tileName"
                   value={formData.tileName}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
+                  className="font-poppins w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                 
                 />
               </div>
 
               {/* Tile Category */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="font-poppins block text-sm font-medium text-gray-700 mb-1">
                   Tile Category
                 </label>
                 {categoryLoading ? (
-                  <div className="w-full px-3 py-2 border rounded-md bg-gray-100">
+                  <div className="font-poppins w-full px-3 py-2 border rounded-md bg-gray-100">
                     Loading categories...
                   </div>
                 ) : (
@@ -557,7 +557,7 @@ const AddTiles = () => {
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
+                    className="font-poppins w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                   
                     disabled={categoryLoading || categoryError}
                   >
@@ -570,7 +570,7 @@ const AddTiles = () => {
                   </select>
                 )}
                 {categoryError && (
-                  <p className="mt-1 text-sm text-red-600">{categoryError}</p>
+                  <p className="font-poppins mt-1 text-sm text-red-600">{categoryError}</p>
                 )}
               </div>
             </div>
@@ -579,7 +579,7 @@ const AddTiles = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Left Column - Main Mask */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="font-poppins block text-sm font-medium text-gray-700 mb-1">
                   Main Mask
                 </label>
                 <div className="w-full max-w-md overflow-hidden">
@@ -625,7 +625,7 @@ const AddTiles = () => {
               <div className="space-y-4">
                 {/* Background Color */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="font-poppins block text-sm font-medium text-gray-700 mb-1">
                     Background Color
                   </label>
                   <button
@@ -634,7 +634,7 @@ const AddTiles = () => {
                       setCurrentColorTarget("main");
                       setShowColorPicker(true);
                     }}
-                    className="w-full px-3 py-2 border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#bd5b4c] flex items-center justify-between group"
+                    className="font-poppins w-full px-3 py-2 border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#bd5b4c] flex items-center justify-between group"
                   >
                     <span className="text-sm text-gray-600 group-hover:text-gray-900">
                       {selectedColorHexCodes.main || "Select Color"}
@@ -654,14 +654,14 @@ const AddTiles = () => {
 
                 {/* Grout Shape */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="font-poppins block text-sm font-medium text-gray-700 mb-1">
                     Grout Shape
                   </label>
                   <select
                     name="groutShape"
                     value={formData.groutShape}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
+                    className="font-poppins w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                   
                   >
                     <option value="">Select Grout Shape</option>
@@ -675,14 +675,14 @@ const AddTiles = () => {
 
                 {/* Shape Style */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="font-poppins block text-sm font-medium text-gray-700 mb-1">
                     Shape Style
                   </label>
                   <select
                     name="shapeStyle"
                     value={formData.shapeStyle}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
+                    className="font-poppins w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                   
                   >
                     <option value="">Select Shape Style</option>
@@ -696,7 +696,7 @@ const AddTiles = () => {
 
                 {/* Scale */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="font-poppins block text-sm font-medium text-gray-700 mb-1">
                     Scale
                   </label>
                   <input
@@ -707,10 +707,10 @@ const AddTiles = () => {
                     min={scaleRange.min}
                     max={scaleRange.max}
                     step={scaleRange.step}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
+                    className="font-poppins w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#bd5b4c]"
                   
                   />
-                  <div className="mt-1 text-sm text-gray-500">
+                  <div className="mt-1 text-sm text-gray-500 font-poppins">
                     <p>
                       Value of 1 will have the tile render at the normal size.
                     </p>
@@ -728,7 +728,7 @@ const AddTiles = () => {
 
             {/* Tile Masks Section */}
             <div className="mt-8">
-              <h2 className="text-lg font-medium mb-4">Tile Masks</h2>
+              <h2 className="text-lg font-medium mb-4 font-poppins">Tile Masks</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4  gap-4">
                 {/* Existing Masks */}
                 {formData.tileMasks.map((_, index) => (
@@ -901,7 +901,7 @@ const AddTiles = () => {
                 disabled={loading}
                 className={`${
                   loading ? "opacity-50 cursor-not-allowed" : ""
-                } bg-[#bd5b4c] text-white px-6 py-2 rounded hover:bg-red-700 transition-colors`}
+                } font-poppins bg-[#bd5b4c] text-white px-6 py-2 rounded hover:bg-red-700 transition-colors`}
               >
                 {loading 
                   ? (isEditing ? "Updating..." : "Adding...") 
@@ -910,7 +910,7 @@ const AddTiles = () => {
               <button
                 type="button"
                 onClick={() => navigate("/dashboard/all-tiles")}
-                className="bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300 transition-colors"
+                className="font-poppins bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300 transition-colors"
               >
                 Cancel
               </button>
