@@ -78,8 +78,8 @@ const Submissions = () => {
       <div className="p-6 bg-gray-100 min-h-screen">
         <h1 className="text-2xl font-semibold mb-4">Submissions</h1>
         <div className="bg-white rounded-lg shadow overflow-x-auto custom-scrollbar">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 font-poppins font-li">
+          <table className="min-w-full divide-y divide-gray-200 text-xs">
+            <thead className="bg-gray-50 font-poppins font-li text-xs">
               <tr>
                 <th className="p-4 text-left">Image</th>
                 <th className="p-4 text-left">Name</th>
@@ -103,7 +103,7 @@ const Submissions = () => {
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="p-4">
                       <div className="flex gap-1">
-                        <img src={item.image} alt="avatar" className="h-16 w-16 rounded-lg object-cover border" />
+                        <img src={item.image} alt="avatar" className="h-16 w-16 rounded-lg object-contain" />
                       </div>
                     </td>
                     <td className="p-4 text-blue-700 font-semibold whitespace-nowrap">{item.name}</td>

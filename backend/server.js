@@ -1,13 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+dotenv.config();
 const cors = require("cors");
 const path = require("path");
 const authRoutes = require("./routes/authRoutes");
 const tileRoutes = require("./routes/tileRoute");
 const tileCategoryRoutes = require("./routes/tileCategoryRoutes");
 const tileColorRoutes = require("./routes/tileColorRoutes");
-dotenv.config();
 
 const app = express();
 

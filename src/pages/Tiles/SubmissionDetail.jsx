@@ -36,16 +36,30 @@ const SubmissionDetail = () => {
           </svg>
         </button>
         <div className="space-y-3 text-center">
-          <div className="grid grid-cols-1 sm:grid-cols-2 mb-2 gap-x-0 gap-y-3">
+          <div className={`mb-2 gap-x-0 gap-y-3 ${submission.tilePatternBorderImage && !submission.tilePatternBorderImage.includes('via.placeholder.com/480x480/f0f0f0/666666?text=Tile+Preview') ? 'grid grid-cols-1 sm:grid-cols-2' : 'flex flex-col items-center'}`}>
+            {/* Tile Pattern Image */}
             {submission.tilePatternImage && !submission.tilePatternImage.includes('via.placeholder.com/480x480/f0f0f0/666666?text=Tile+Preview') ? (
-              <img src={submission.tilePatternImage} alt="Tile Pattern" className="h-[200px] w-[200px] rounded-lg object-cover border" onError={e => { e.target.onerror = null; e.target.src = '/Images/logo.png'; }} />
+              <img
+                src={submission.tilePatternImage}
+                alt="Tile Pattern"
+                className={`${submission.tilePatternBorderImage && !submission.tilePatternBorderImage.includes('via.placeholder.com/480x480/f0f0f0/666666?text=Tile+Preview') ? 'h-[200px] w-[200px]' : 'h-[220px] w-[220px]'} rounded-lg object-cover border`}
+                onError={e => { e.target.onerror = null; e.target.src = '/Images/logo.png'; }}
+              />
             ) : (
-              <img src="/Images/logo.png" alt="Tile Pattern" className="h-[100px] w-[100px] rounded-lg object-cover border" />
+              <img
+                src="/Images/logo.png"
+                alt="Tile Pattern"
+                className={`${submission.tilePatternBorderImage && !submission.tilePatternBorderImage.includes('via.placeholder.com/480x480/f0f0f0/666666?text=Tile+Preview') ? 'h-[100px] w-[100px]' : 'h-[220px] w-[220px]'} rounded-lg object-cover border`}
+              />
             )}
-            {submission.tilePatternBorderImage && !submission.tilePatternBorderImage.includes('via.placeholder.com/480x480/f0f0f0/666666?text=Tile+Preview') ? (
-              <img src={submission.tilePatternBorderImage} alt="Tile Pattern Border" className="h-[200px] w-[200px] rounded-lg object-cover border" onError={e => { e.target.onerror = null; e.target.src = '/Images/logo.png'; }} />
-            ) : (
-              <img src="/Images/logo.png" alt="Tile Pattern Border" className="h-[100px] w-[100px] rounded-lg object-cover border" />
+            {/* Tile Pattern Border Image (only if present) */}
+            {submission.tilePatternBorderImage && !submission.tilePatternBorderImage.includes('via.placeholder.com/480x480/f0f0f0/666666?text=Tile+Preview') && (
+              <img
+                src={submission.tilePatternBorderImage}
+                alt="Tile Pattern Border"
+                className="h-[200px] w-[200px] rounded-lg object-cover border"
+                onError={e => { e.target.onerror = null; e.target.src = '/Images/logo.png'; }}
+              />
             )}
           </div>
           <div className="space-y-3 text-left mt-6 font-poppins">
